@@ -66,6 +66,7 @@ def get_model(model_name):
         "context_aware_recommender",
         "sequential_recommender",
         "knowledge_aware_recommender",
+        "sequential_attribute_recommender",
         "exlib_recommender",
     ]
 

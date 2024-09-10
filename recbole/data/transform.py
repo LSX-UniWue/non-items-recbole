@@ -4,11 +4,13 @@
 # @Email  : zgw15630559577@163.com
 
 import math
+import numpy
 import numpy as np
 import random
 import torch
 from copy import deepcopy
 from recbole.data.interaction import Interaction, cat_interactions
+from recbole.model.sequential_attribute_recommender.content_layers import create_mask_or_pad_dict
 
 
 def construct_transform(config):
@@ -20,6 +22,7 @@ def construct_transform(config):
     else:
         str2transform = {
             "mask_itemseq": MaskItemSequence,
+            "mask_itemseqAndAttributes": MaskItemSequenceAndAttributes,
             "inverse_itemseq": InverseItemSequence,
             "crop_itemseq": CropItemSequence,
             "reorder_itemseq": ReorderItemSequence,
@@ -189,6 +192,191 @@ class MaskItemSequence:
                 self.MASK_INDEX: masked_index,
             }
             interaction.update(Interaction(new_dict))
+        return interaction
+
+
+
+class MaskItemSequenceAndAttributes:
+    """
+    Mask item and attribute sequences for training.
+    """
+
+    def __init__(self, config):
+
+        self.finetune = "BATCH" if not hasattr(config,"finetune") else config["finetune"]
+        #NONE, BATCH, SAMPLE, ALWAYS
+        self.masking_options = "ONLY_MASK" if not hasattr(config,"masking_options") else config["masking_options"]
+        #RANDOM_VALUE, ONLY_MASK
+        self.num_of_masked_items_choice = "actual" if not hasattr(config, "num_of_masked_items_choice") else config["num_of_masked_items_choice"]
+        #max or actual or variable or variable_min
+
+        self.minimum_masked_numbers = 1
+
+        self.ITEM_SEQ = config["ITEM_ID_FIELD"] + config["LIST_SUFFIX"]
+        self.ITEM_ID = config["ITEM_ID_FIELD"]
+        self.MASK_ITEM_SEQ = "mask_" + self.ITEM_SEQ
+        self.POS_ITEMS = "Pos_" + config["ITEM_ID_FIELD"]
+        self.max_seq_length = config["MAX_ITEM_LIST_LENGTH"]
+        self.mask_ratio = config["mask_ratio"]
+        self.ft_ratio = 0 if not hasattr(config, "ft_ratio") else config["ft_ratio"]
+        self.mask_item_length = max(int(self.mask_ratio * self.max_seq_length),1)
+        self.MASK_INDEX = "MASK_INDEX"
+        config["MASK_INDEX"] = "MASK_INDEX"
+        config["MASK_ITEM_SEQ"] = self.MASK_ITEM_SEQ
+        config["POS_ITEMS"] = self.POS_ITEMS
+        self.ITEM_SEQ_LEN = config["ITEM_LIST_LENGTH_FIELD"]
+        self.item_config = config["items"]
+        self.config = config
+        self.masking_tokens_dict = None
+
+    def create_mask_dict(self, item_attributes, dataset):
+        mask_dict = {}
+        if item_attributes is not None:
+            for attribute_name, attribute_infos in item_attributes["attributes"].items():
+                if attribute_infos.get("mask", None) is not None:
+                    mask_dict[attribute_name] = attribute_infos["mask"]
+                else:
+                    mask_dict[attribute_name] = len(dataset.field2token_id[attribute_name])
+                mask_len = attribute_infos.get("len", None)
+                if mask_len is not None and mask_len != 1:
+                    mask_dict[attribute_name] = [mask_dict[attribute_name]] * mask_len
+            if item_attributes.get("item_id_type_settings", None) is not None:
+                mask_dict[item_attributes["item_id_type_settings"]["name"]] = 0
+        return mask_dict
+
+    def __call__(self, dataset, interaction):
+
+        batched_item_sequences = interaction[self.ITEM_SEQ]
+        batched_masked_item_sequences = batched_item_sequences.clone()
+        batched_sequence_lengths = interaction[self.ITEM_SEQ_LEN]
+        if torch.all(batched_sequence_lengths < 2):
+            raise ValueError("batched_sequence_lengths contains len < 2, line 250")
+        device = batched_item_sequences.device
+        batch_size = batched_item_sequences.size(0)
+        item_masking_token = dataset.num(self.ITEM_ID)
+
+        # Create masks tokens for attributes once
+        if self.masking_tokens_dict is None:
+            self.masking_tokens_dict = self.create_mask_dict(self.item_config, dataset)
+
+        batched_masked_attribute_sequences = {} #Dict with all attributes to be masked
+
+        if self.item_config is not None:
+            if self.item_config.get("attributes") is not None:
+                for (attribute_name, infos) in self.item_config["attributes"].items():
+                    batched_masked_attribute_sequences[attribute_name] = interaction[attribute_name + "_list"].clone()
+            if self.item_config.get("item_id_type_settings") is not None:
+                item_id_name = self.item_config["item_id_type_settings"]["name"]
+                batched_masked_attribute_sequences[item_id_name] = interaction[item_id_name + "_list"].clone()
+
+        final_mask_len = self.mask_item_length
+        if self.finetune == "BATCH":
+            finetune_random_number = random.random()
+        if self.finetune == "ALWAYS":
+            final_mask_len = self.mask_item_length + 1
+
+        batch_mask_index_ids = torch.zeros([batch_size, final_mask_len], dtype=torch.long, device=device)
+        batch_pos_items = torch.zeros([batch_size, final_mask_len], dtype=torch.long, device=device)
+
+        for sample_id in range(batch_size):
+            original_item_sequence = batched_masked_item_sequences[sample_id]
+            masked_item_sequence = batched_masked_item_sequences[sample_id]
+
+            if self.finetune == "SAMPLE":
+                finetune_random_number = random.random()
+
+            if self.finetune in ["BATCH","SAMPLE"] and finetune_random_number < self.ft_ratio:
+                number_of_masked_items = 1
+                mask_index_ids = torch.tensor([batched_sequence_lengths[sample_id] - 1], dtype=torch.long, device=device)
+                positive_items = masked_item_sequence[mask_index_ids]
+                masked_item_sequence[mask_index_ids] = item_masking_token
+                if 0 in positive_items:
+                    raise ValueError("0 in tensor positive_items, line 288")
+            else:
+                #Determine the number of masked items
+                if self.num_of_masked_items_choice == "actual":
+                    number_of_masked_items = max(int(self.mask_ratio * batched_sequence_lengths[sample_id]), 1)
+                    base_sequence_len = batched_sequence_lengths[sample_id]
+                elif self.num_of_masked_items_choice == "max":
+                    number_of_masked_items = self.mask_item_length
+                    base_sequence_len = self.max_seq_length
+                elif self.num_of_masked_items_choice == "variable":
+                    number_of_masked_items = random.randint(self.minimum_masked_numbers, self.mask_item_length)
+                    base_sequence_len = self.max_seq_length
+                elif self.num_of_masked_items_choice == "variable_min":
+                    max_number = max(int(self.mask_ratio * batched_sequence_lengths[sample_id]), 1)
+                    number_of_masked_items = random.randint(self.minimum_masked_numbers, max_number)
+                    base_sequence_len = batched_sequence_lengths[sample_id]
+                else:
+                    raise ValueError("num_of_masked_items_choice must be one of 'actual', 'max' or 'variable_min' 'variable'")
+
+                #Determine IDs of masked Items
+                mask_index_ids = torch.randperm(base_sequence_len, dtype=torch.long, device=device)[:number_of_masked_items]
+                positive_items = masked_item_sequence[mask_index_ids]
+                if 0 in positive_items:
+                    torch.set_printoptions(profile="full")
+                    print("original_item_sequence: ")
+                    print(original_item_sequence)
+                    print("mask_index_ids: ")
+                    print(mask_index_ids)
+                    print("positive_items: ")
+                    print(positive_items)
+                    torch.set_printoptions(profile="default")  # reset
+                    raise ValueError("0 in tensor positive_items, line 309")
+
+                if self.masking_options == "ONLY_MASK":
+                    masked_item_sequence[mask_index_ids] = item_masking_token
+
+                elif self.masking_options == "RANDOM_VALUE":
+                    for current_mask_index in mask_index_ids:
+                        prop = random.random()
+                        if prop < 0.8:
+                            masked_item_sequence[current_mask_index] = item_masking_token
+                        elif prop < 0.9:
+                            masked_item_sequence[current_mask_index] = random.randint(1, item_masking_token - 1)
+                        elif prop <1.0:
+                           ... # keep Value
+
+                if self.finetune == "ALWAYS":
+                    if batched_sequence_lengths[sample_id] -1 not in mask_index_ids:
+                        number_of_masked_items += 1
+                        mask_index_ids = torch.concat([mask_index_ids,
+                                                       torch.tensor([batched_sequence_lengths[sample_id] - 1], dtype=torch.long, device=device)])
+                        positive_items = torch.concat([positive_items,torch.tensor([masked_item_sequence[batched_sequence_lengths[sample_id] - 1]], dtype=torch.long, device=device)])
+                        masked_item_sequence[mask_index_ids] = item_masking_token
+                        if 0 in positive_items:
+                            raise ValueError("0 in tensor positive_items, line 332")
+
+            #Pad to the max mask length with zeros
+            mask_index_ids = torch.concat([torch.zeros(final_mask_len - number_of_masked_items, dtype=torch.long,
+                                                       device=device), mask_index_ids])
+            batch_mask_index_ids[sample_id] = mask_index_ids
+            batch_pos_items[sample_id] = torch.concat([torch.zeros(final_mask_len - number_of_masked_items,
+                                                                   dtype=torch.long, device=device), positive_items])
+
+            if torch.sum(batch_pos_items) == 0:
+                torch.set_printoptions(profile="full")
+                print("batched_item_sequences: ")
+                print(batched_item_sequences)
+                print("batch_pos_items: ")
+                print(batch_pos_items)
+                torch.set_printoptions(profile="default")  # reset
+                raise ValueError("sum(batch_pos_items) = 0, line 339")
+
+            for (attribute_name, attribute_sequences) in batched_masked_attribute_sequences.items():
+                attribute_sequence_sample = attribute_sequences[sample_id]
+                mask_token = self.masking_tokens_dict[attribute_name]
+                attribute_sequence_sample[mask_index_ids] = torch.tensor(mask_token, dtype=attribute_sequences.dtype,
+                                                                         device=device)
+
+        masked_entries_dict = {
+            self.MASK_ITEM_SEQ: batched_masked_item_sequences,
+            self.MASK_INDEX: batch_mask_index_ids,
+            self.POS_ITEMS: batch_pos_items,
+        }
+        for (k, attribute_sequences) in batched_masked_attribute_sequences.items():
+            masked_entries_dict[("mask_" + k + "_list")] = attribute_sequences
+        interaction.update(Interaction(masked_entries_dict))
         return interaction
 
 
