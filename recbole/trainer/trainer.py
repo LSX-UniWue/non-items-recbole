@@ -17,6 +17,7 @@ recbole.trainer.trainer
 ################################
 """
 
+import csv
 import os
 
 from logging import getLogger
@@ -520,6 +521,13 @@ class Trainer(AbstractTrainer):
 
     def _full_sort_batch_eval(self, batched_data):
         interaction, history_index, positive_u, positive_i = batched_data
+        #use only real items in top list to compute metrics
+        item_id_type = self.config.final_config_dict.get("eval_args").get("item_id", None)
+        if item_id_type is not None:
+            item_type_tensor = torch.nonzero(self.item_tensor[item_id_type] != 1).to(self.device).squeeze(1)
+            history_row = torch.tensor(range(0,len(interaction))).to(self.device)[:, None]
+            history_col = item_type_tensor
+            history_index = history_row, history_col
         try:
             # Note: interaction without item ids
             scores = self.model.full_sort_predict(interaction.to(self.device))
@@ -560,7 +568,7 @@ class Trainer(AbstractTrainer):
 
     @torch.no_grad()
     def evaluate(
-        self, eval_data, load_best_model=True, model_file=None, show_progress=False
+        self, eval_data, load_best_model=True, model_file=None, show_progress=False, write_predictions=None
     ):
         r"""Evaluate the model based on the eval data.
 
@@ -571,6 +579,7 @@ class Trainer(AbstractTrainer):
             model_file (str, optional): the saved model file, default: None. If users want to test the previously
                                         trained model file, they can set this parameter.
             show_progress (bool): Show the progress of evaluate epoch. Defaults to ``False``.
+            write_predictions (str, optional): the file path to write the predictions, default: None.
 
         Returns:
             collections.OrderedDict: eval result, key is the eval metric and value in the corresponding metric value.
@@ -611,6 +620,26 @@ class Trainer(AbstractTrainer):
         )
 
         num_sample = 0
+        if write_predictions is not None:
+            os.makedirs(os.path.dirname(write_predictions), exist_ok=True)
+            with open(write_predictions, 'w') as file:
+                userid_name = eval_data.config.final_config_dict.get("USER_ID_FIELD")
+                file.write(f"{userid_name}\trecos\n")
+                num_sample = self.eval_all_batches(eval_func, iter_data, num_sample, show_progress, eval_data, file)
+        else:
+            num_sample = self.eval_all_batches(eval_func, iter_data, num_sample, show_progress, eval_data)
+
+
+        self.eval_collector.model_collect(self.model)
+        struct = self.eval_collector.get_data_struct()
+        result = self.evaluator.evaluate(struct)
+        if not self.config["single_spec"]:
+            result = self._map_reduce(result, num_sample)
+        self.wandblogger.log_eval_metrics(result, head="eval")
+
+        return result
+
+    def eval_all_batches(self, eval_func, iter_data, num_sample, show_progress, eval_data, output_file=None):
         for batch_idx, batched_data in enumerate(iter_data):
             num_sample += len(batched_data)
             interaction, scores, positive_u, positive_i = eval_func(batched_data)
@@ -621,13 +650,19 @@ class Trainer(AbstractTrainer):
             self.eval_collector.eval_batch_collect(
                 scores, interaction, positive_u, positive_i
             )
-        self.eval_collector.model_collect(self.model)
-        struct = self.eval_collector.get_data_struct()
-        result = self.evaluator.evaluate(struct)
-        if not self.config["single_spec"]:
-            result = self._map_reduce(result, num_sample)
-        self.wandblogger.log_eval_metrics(result, head="eval")
-        return result
+            if output_file is not None:
+                userid_name = eval_data.config.final_config_dict.get("USER_ID_FIELD")
+                itemid_name = eval_data.config.final_config_dict.get("ITEM_ID_FIELD")
+                id2token_dict = eval_data.dataset.field2id_token
+
+                for i in range(len(interaction)):
+                    userid = id2token_dict[userid_name][interaction[i][userid_name]]
+                    top5_indices = torch.topk(scores[i], 5).indices
+                    recos = str(list(id2token_dict[itemid_name][top5_indices]))
+
+                output_file.write(f"{userid}\t{recos}\n")
+
+        return num_sample
 
     def _map_reduce(self, result, num_sample):
         gather_result = {}
