@@ -1,0 +1,101 @@
+
+# Start with run_recbole.py
+#  --model=GRU4RecAttr
+#  --dataset=ml-extended
+#  --config_files
+#    /Users/lisa/RecBole/configs/non_item_page_embeddding_GRU4Rec_sample.yaml
+
+# Model
+model: GRU4RecAttr
+embedding_size: 4
+dropout_prob: 0.3
+hidden_size: 6
+num_layers: 2
+loss_type: 'CE'
+
+#General
+seed: 212
+state: DEBUG  #INFO
+reproducibility: True
+data_path: '/Users/lisa/RecBole/dataset/'
+checkpoint_dir: 'saved'
+show_progress: True
+save_dataset: False
+save_dataloaders: False
+
+# Data Augmentation
+subsequences_end_with_items: True
+train_subsequences: False
+#test_subsequences: True
+
+# Item Attributes
+items:
+  attribute_fusion: 'sum' #fusion function for attributes
+  attributes_listpage_only: True # only use attributes for non-items
+  item_id_type_settings: # item_id_type marks items as actual items or non-items
+    name: "item_id_type" #name
+  attributes: #list all attributes with their embeddings
+    genres: #name of the attribute
+      embedding_type: 'multihot' #multi-hot encoding
+
+# dataset
+load_col:
+  inter:
+    - userId
+    - timestamp
+    - title
+    - genres
+    - title_genres
+    - item_id_type
+  item: #item attributes: item_id_type needed to evaluate on items only - add the ITEM_ID_FIELD
+    - title
+    - item_id_type
+seq_separator: '|'
+seq_len: #for sequencial features: List max len
+  genres: 6
+
+# Filtering
+val_interval: ~
+filter_inter_by_user_or_item: False
+user_inter_num_interval: "[5,inf)"
+item_inter_num_interval: "[5,inf)"
+
+#log_wandb: True
+
+# training settings
+epochs: 1
+train_batch_size: 2
+
+learner: adam
+learning_rate: 0.001
+eval_step: 2
+stopping_step: 10
+clip_grad_norm: ~
+weight_decay: 0.0
+
+benchmark_filename: ["test","validation","train"] #In combination with BenchAttrSequentialDataset this
+                                                  #loads files in the normal .inter format
+
+# evaluation settings
+eval_args:
+  #split: {'RS': [0.8,0.1,0.1]}
+  item_id: item_id_type
+  group_by: user
+  order: TO
+  mode: full
+
+repeatable: True
+metrics: ["Recall","NDCG","MRR"]
+topk: [3,5,10,20]
+valid_metric: Recall@20
+valid_metric_bigger: True
+eval_batch_size: 16
+valid_batch_size: 2
+loss_decimal_place: 4
+metric_decimal_place: 4
+train_neg_sample_args: null
+MAX_ITEM_LIST_LENGTH: 10
+USER_ID_FIELD: userId
+RATING_FIELD: rating
+TIME_FIELD: timestamp
+ITEM_ID_FIELD: title #title contains only a dummy id for non-items, therefore the attributes represent the content

@@ -1,0 +1,389 @@
+timestamp:float	item_id_type:float	userId:token	title:token	title_genres:token	genres:token_seq
+1094785598	0	1	OVERVIEW-PAGE	Adventure|Drama|Sci-Fi	Adventure|Drama|Sci-Fi
+1094785598	1	1	2001: A Space Odyssey (1968)	2001: A Space Odyssey (1968)	Adventure|Drama|Sci-Fi
+1094785621	0	1	OVERVIEW-PAGE	Adventure|Children|Fantasy|Musical	Adventure|Children|Fantasy|Musical
+1094785621	1	1	Wizard of Oz, The (1939)	Wizard of Oz, The (1939)	Adventure|Children|Fantasy|Musical
+1094785650	0	1	OVERVIEW-PAGE	Action|Adventure|Comedy	Action|Adventure|Comedy
+1094785650	1	1	Austin Powers: The Spy Who Shagged Me (1999)	Austin Powers: The Spy Who Shagged Me (1999)	Action|Adventure|Comedy
+1094785656	0	1	OVERVIEW-PAGE	Drama|Sci-Fi	Drama|Sci-Fi
+1094785656	1	1	Contact (1997)	Contact (1997)	Drama|Sci-Fi
+1094785665	0	1	OVERVIEW-PAGE	Comedy|Crime	Comedy|Crime
+1094785665	1	1	Fish Called Wanda, A (1988)	Fish Called Wanda, A (1988)	Comedy|Crime
+1094785691	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy	Action|Adventure|Fantasy
+1094785691	1	1	Dragonheart (1996)	Dragonheart (1996)	Action|Adventure|Fantasy
+1094785698	0	1	OVERVIEW-PAGE	Action|Crime|Drama|Thriller	Action|Crime|Drama|Thriller
+1094785698	1	1	Fight Club (1999)	Fight Club (1999)	Action|Crime|Drama|Thriller
+1094785709	0	1	OVERVIEW-PAGE	Drama	Drama
+1094785709	1	1	What's Eating Gilbert Grape (1993)	What's Eating Gilbert Grape (1993)	Drama
+1094785720	0	1	OVERVIEW-PAGE	Action|Western	Action|Western
+1094785720	1	1	Butch Cassidy and the Sundance Kid (1969)	Butch Cassidy and the Sundance Kid (1969)	Action|Western
+1094785727	0	1	OVERVIEW-PAGE	Action|Drama|Romance	Action|Drama|Romance
+1094785727	1	1	Crouching Tiger, Hidden Dragon (Wo hu cang long) (2000)	Crouching Tiger, Hidden Dragon (Wo hu cang long) (2000)	Action|Drama|Romance
+1094785734	0	1	OVERVIEW-PAGE	Action|Drama|Romance|War	Action|Drama|Romance|War
+1094785734	1	1	Rob Roy (1995)	Rob Roy (1995)	Action|Drama|Romance|War
+1094785740	0	1	OVERVIEW-PAGE	Action|Adventure|Comedy|Crime	Action|Adventure|Comedy|Crime
+1094785740	1	1	Rumble in the Bronx (Hont faan kui) (1995)	Rumble in the Bronx (Hont faan kui) (1995)	Action|Adventure|Comedy|Crime
+1094785746	0	1	OVERVIEW-PAGE	Action|Adventure|Sci-Fi|Thriller	Action|Adventure|Sci-Fi|Thriller
+1094785746	1	1	Star Trek II: The Wrath of Khan (1982)	Star Trek II: The Wrath of Khan (1982)	Action|Adventure|Sci-Fi|Thriller
+1094785759	0	1	OVERVIEW-PAGE	Drama	Drama
+1094785759	1	1	Dead Poets Society (1989)	Dead Poets Society (1989)	Drama
+1094785764	0	1	OVERVIEW-PAGE	Action|Adventure|Thriller	Action|Adventure|Thriller
+1094785764	1	1	Die Hard 2 (1990)	Die Hard 2 (1990)	Action|Adventure|Thriller
+1094785777	0	1	OVERVIEW-PAGE	Drama|Fantasy|Romance	Drama|Fantasy|Romance
+1094785777	1	1	Edward Scissorhands (1990)	Edward Scissorhands (1990)	Drama|Fantasy|Romance
+1094785784	0	1	OVERVIEW-PAGE	Adventure|Animation|Children|Comedy|Fantasy|Romance	Adventure|Animation|Children|Comedy|Fantasy|Romance
+1094785784	1	1	Shrek (2001)	Shrek (2001)	Adventure|Animation|Children|Comedy|Fantasy|Romance
+1094785977	0	1	OVERVIEW-PAGE	Horror|Sci-Fi	Horror|Sci-Fi
+1094785977	1	1	Alien (1979)	Alien (1979)	Horror|Sci-Fi
+1094785986	0	1	OVERVIEW-PAGE	Comedy|Fantasy	Comedy|Fantasy
+1094785986	1	1	Young Frankenstein (1974)	Young Frankenstein (1974)	Comedy|Fantasy
+1094785994	0	1	OVERVIEW-PAGE	Crime|Horror	Crime|Horror
+1094785994	1	1	Psycho (1960)	Psycho (1960)	Crime|Horror
+1094785994	0	1	OVERVIEW-PAGE	Horror	Horror
+1094785994	1	1	Shining, The (1980)	Shining, The (1980)	Horror
+1094786004	0	1	OVERVIEW-PAGE	Horror|Mystery|Thriller	Horror|Mystery|Thriller
+1094786004	1	1	Ringu (Ring) (1998)	Ringu (Ring) (1998)	Horror|Mystery|Thriller
+1094786008	0	1	OVERVIEW-PAGE	Drama|Horror|Mystery|Thriller	Drama|Horror|Mystery|Thriller
+1094786008	1	1	Others, The (2001)	Others, The (2001)	Drama|Horror|Mystery|Thriller
+1094786012	0	1	OVERVIEW-PAGE	Action|Comedy|Sci-Fi	Action|Comedy|Sci-Fi
+1094786012	1	1	Ghostbusters (a.k.a. Ghost Busters) (1984)	Ghostbusters (a.k.a. Ghost Busters) (1984)	Action|Comedy|Sci-Fi
+1094786017	0	1	OVERVIEW-PAGE	Drama|Horror|Sci-Fi	Drama|Horror|Sci-Fi
+1094786017	1	1	Frankenstein (1931)	Frankenstein (1931)	Drama|Horror|Sci-Fi
+1094786027	0	1	OVERVIEW-PAGE	Crime|Drama|Horror	Crime|Drama|Horror
+1094786027	1	1	Freaks (1932)	Freaks (1932)	Crime|Drama|Horror
+1094786034	0	1	OVERVIEW-PAGE	Horror|Mystery	Horror|Mystery
+1094786034	1	1	Exorcist, The (1973)	Exorcist, The (1973)	Horror|Mystery
+1094786048	0	1	OVERVIEW-PAGE	Action|Horror|Sci-Fi	Action|Horror|Sci-Fi
+1094786048	1	1	28 Days Later (2002)	28 Days Later (2002)	Action|Horror|Sci-Fi
+1094786056	0	1	OVERVIEW-PAGE	Horror	Horror
+1094786056	1	1	Nosferatu (Nosferatu, eine Symphonie des Grauens) (1922)	Nosferatu (Nosferatu, eine Symphonie des Grauens) (1922)	Horror
+1094786062	0	1	OVERVIEW-PAGE	Comedy|Horror|Thriller	Comedy|Horror|Thriller
+1094786062	1	1	American Werewolf in London, An (1981)	American Werewolf in London, An (1981)	Comedy|Horror|Thriller
+1094786067	0	1	OVERVIEW-PAGE	Comedy|Horror	Comedy|Horror
+1094786067	1	1	Bubba Ho-tep (2002)	Bubba Ho-tep (2002)	Comedy|Horror
+1094786077	0	1	OVERVIEW-PAGE	Action|Horror|Sci-Fi|Thriller	Action|Horror|Sci-Fi|Thriller
+1094786077	1	1	Thing, The (1982)	Thing, The (1982)	Action|Horror|Sci-Fi|Thriller
+1094786082	0	1	OVERVIEW-PAGE	Action|Adventure|Comedy|Fantasy|Horror	Action|Adventure|Comedy|Fantasy|Horror
+1094786082	1	1	Army of Darkness (1993)	Army of Darkness (1993)	Action|Adventure|Comedy|Fantasy|Horror
+1094786087	0	1	OVERVIEW-PAGE	Horror|Thriller	Horror|Thriller
+1094786087	1	1	Poltergeist (1982)	Poltergeist (1982)	Horror|Thriller
+1094786092	0	1	OVERVIEW-PAGE	Thriller	Thriller
+1094786092	1	1	Dead Zone, The (1983)	Dead Zone, The (1983)	Thriller
+1094786101	0	1	OVERVIEW-PAGE	Horror|Mystery|Sci-Fi|Thriller	Horror|Mystery|Sci-Fi|Thriller
+1094786101	1	1	Invasion of the Body Snatchers (1978)	Invasion of the Body Snatchers (1978)	Horror|Mystery|Sci-Fi|Thriller
+1094786104	0	1	OVERVIEW-PAGE	Fantasy|Horror|Thriller	Fantasy|Horror|Thriller
+1094786104	1	1	Evil Dead, The (1981)	Evil Dead, The (1981)	Fantasy|Horror|Thriller
+1094786108	0	1	OVERVIEW-PAGE	Horror|Mystery|Thriller	Horror|Mystery|Thriller
+1094786108	1	1	Ring, The (2002)	Ring, The (2002)	Horror|Mystery|Thriller
+1094786113	0	1	OVERVIEW-PAGE	Action|Comedy|Fantasy|Horror	Action|Comedy|Fantasy|Horror
+1094786113	1	1	Evil Dead II (Dead by Dawn) (1987)	Evil Dead II (Dead by Dawn) (1987)	Action|Comedy|Fantasy|Horror
+1094786132	0	1	OVERVIEW-PAGE	Animation|Fantasy|Horror|Sci-Fi	Animation|Fantasy|Horror|Sci-Fi
+1094786132	1	1	Vampire Hunter D: Bloodlust (Banpaia hantÃ¢ D) (2000)	Vampire Hunter D: Bloodlust (Banpaia hantÃ¢ D) (2000)	Animation|Fantasy|Horror|Sci-Fi
+1094786139	0	1	OVERVIEW-PAGE	Horror|Mystery	Horror|Mystery
+1094786139	1	1	Jacob's Ladder (1990)	Jacob's Ladder (1990)	Horror|Mystery
+1094786143	0	1	OVERVIEW-PAGE	Fantasy|Horror|Mystery|Romance	Fantasy|Horror|Mystery|Romance
+1094786143	1	1	Sleepy Hollow (1999)	Sleepy Hollow (1999)	Fantasy|Horror|Mystery|Romance
+1094786148	0	1	OVERVIEW-PAGE	Horror|Sci-Fi|Thriller	Horror|Sci-Fi|Thriller
+1094786148	1	1	Invasion of the Body Snatchers (1956)	Invasion of the Body Snatchers (1956)	Horror|Sci-Fi|Thriller
+1094786158	0	1	OVERVIEW-PAGE	Horror|Mystery|Thriller	Horror|Mystery|Thriller
+1094786158	1	1	Omen, The (1976)	Omen, The (1976)	Horror|Mystery|Thriller
+1094786161	0	1	OVERVIEW-PAGE	Action|Drama|Horror	Action|Drama|Horror
+1094786161	1	1	Dawn of the Dead (1978)	Dawn of the Dead (1978)	Action|Drama|Horror
+1094786172	0	1	OVERVIEW-PAGE	Horror|Sci-Fi	Horror|Sci-Fi
+1094786172	1	1	Invisible Man, The (1933)	Invisible Man, The (1933)	Horror|Sci-Fi
+1112484493	0	1	OVERVIEW-PAGE	Mystery|Thriller	Mystery|Thriller
+1112484493	1	1	Memento (2000)	Memento (2000)	Mystery|Thriller
+1112484525	0	1	OVERVIEW-PAGE	Action|Crime|Drama|Thriller	Action|Crime|Drama|Thriller
+1112484525	1	1	Hard-Boiled (Lat sau san taam) (1992)	Hard-Boiled (Lat sau san taam) (1992)	Action|Crime|Drama|Thriller
+1112484537	0	1	OVERVIEW-PAGE	Drama|Mystery|Sci-Fi|Thriller	Drama|Mystery|Sci-Fi|Thriller
+1112484537	1	1	Donnie Darko (2001)	Donnie Darko (2001)	Drama|Mystery|Sci-Fi|Thriller
+1112484548	0	1	OVERVIEW-PAGE	Action|Adventure	Action|Adventure
+1112484548	1	1	Yojimbo (1961)	Yojimbo (1961)	Action|Adventure
+1112484560	0	1	OVERVIEW-PAGE	Action|Adventure|Horror|Sci-Fi	Action|Adventure|Horror|Sci-Fi
+1112484560	1	1	Aliens (1986)	Aliens (1986)	Action|Adventure|Horror|Sci-Fi
+1112484569	0	1	OVERVIEW-PAGE	Action|Adventure|Animation|Drama|Fantasy	Action|Adventure|Animation|Drama|Fantasy
+1112484569	1	1	Princess Mononoke (Mononoke-hime) (1997)	Princess Mononoke (Mononoke-hime) (1997)	Action|Adventure|Animation|Drama|Fantasy
+1112484575	0	1	OVERVIEW-PAGE	Action|Crime	Action|Crime
+1112484575	1	1	Enter the Dragon (1973)	Enter the Dragon (1973)	Action|Crime
+1112484580	0	1	OVERVIEW-PAGE	Crime|Mystery|Thriller	Crime|Mystery|Thriller
+1112484580	1	1	Usual Suspects, The (1995)	Usual Suspects, The (1995)	Crime|Mystery|Thriller
+1112484603	0	1	OVERVIEW-PAGE	Action|Sci-Fi|Thriller	Action|Sci-Fi|Thriller
+1112484603	1	1	Blade Runner (1982)	Blade Runner (1982)	Action|Sci-Fi|Thriller
+1112484609	0	1	OVERVIEW-PAGE	Adventure|Comedy|Fantasy	Adventure|Comedy|Fantasy
+1112484609	1	1	Monty Python and the Holy Grail (1975)	Monty Python and the Holy Grail (1975)	Adventure|Comedy|Fantasy
+1112484619	0	1	OVERVIEW-PAGE	Adventure|Fantasy	Adventure|Fantasy
+1112484619	1	1	Lord of the Rings: The Two Towers, The (2002)	Lord of the Rings: The Two Towers, The (2002)	Adventure|Fantasy
+1112484624	0	1	OVERVIEW-PAGE	Action|Adventure	Action|Adventure
+1112484624	1	1	Raiders of the Lost Ark (Indiana Jones and the Raiders of the Lost Ark) (1981)	Raiders of the Lost Ark (Indiana Jones and the Raiders of the Lost Ark) (1981)	Action|Adventure
+1112484633	0	1	OVERVIEW-PAGE	Action|Adventure|Drama|Fantasy	Action|Adventure|Drama|Fantasy
+1112484633	1	1	Lord of the Rings: The Return of the King, The (2003)	Lord of the Rings: The Return of the King, The (2003)	Action|Adventure|Drama|Fantasy
+1112484637	0	1	OVERVIEW-PAGE	Drama|War	Drama|War
+1112484637	1	1	Full Metal Jacket (1987)	Full Metal Jacket (1987)	Drama|War
+1112484642	0	1	OVERVIEW-PAGE	Action|Adventure|Western	Action|Adventure|Western
+1112484642	1	1	Good, the Bad and the Ugly, The (Buono, il brutto, il cattivo, Il) (1966)	Good, the Bad and the Ugly, The (Buono, il brutto, il cattivo, Il) (1966)	Action|Adventure|Western
+1112484661	0	1	OVERVIEW-PAGE	Crime|Horror|Thriller	Crime|Horror|Thriller
+1112484661	1	1	Silence of the Lambs, The (1991)	Silence of the Lambs, The (1991)	Crime|Horror|Thriller
+1112484669	0	1	OVERVIEW-PAGE	Crime|Mystery|Thriller	Crime|Mystery|Thriller
+1112484669	1	1	Reservoir Dogs (1992)	Reservoir Dogs (1992)	Crime|Mystery|Thriller
+1112484676	0	1	OVERVIEW-PAGE	Adventure|Drama|Fantasy|Mystery|Sci-Fi	Adventure|Drama|Fantasy|Mystery|Sci-Fi
+1112484676	1	1	City of Lost Children, The (CitÃ© des enfants perdus, La) (1995)	City of Lost Children, The (CitÃ© des enfants perdus, La) (1995)	Adventure|Drama|Fantasy|Mystery|Sci-Fi
+1112484682	0	1	OVERVIEW-PAGE	Adventure|Fantasy	Adventure|Fantasy
+1112484682	1	1	Lord of the Rings: The Fellowship of the Ring, The (2001)	Lord of the Rings: The Fellowship of the Ring, The (2001)	Adventure|Fantasy
+1112484686	0	1	OVERVIEW-PAGE	Comedy	Comedy
+1112484686	1	1	Monty Python's The Meaning of Life (1983)	Monty Python's The Meaning of Life (1983)	Comedy
+1112484690	0	1	OVERVIEW-PAGE	Drama	Drama
+1112484690	1	1	One Flew Over the Cuckoo's Nest (1975)	One Flew Over the Cuckoo's Nest (1975)	Drama
+1112484703	0	1	OVERVIEW-PAGE	Action|Crime|Drama|Thriller	Action|Crime|Drama|Thriller
+1112484703	1	1	LÃ©on: The Professional (a.k.a. The Professional) (LÃ©on) (1994)	LÃ©on: The Professional (a.k.a. The Professional) (LÃ©on) (1994)	Action|Crime|Drama|Thriller
+1112484727	0	1	OVERVIEW-PAGE	Mystery|Thriller	Mystery|Thriller
+1112484727	1	1	Seven (a.k.a. Se7en) (1995)	Seven (a.k.a. Se7en) (1995)	Mystery|Thriller
+1112484735	0	1	OVERVIEW-PAGE	Action|Adventure|Drama|War	Action|Adventure|Drama|War
+1112484735	1	1	Great Escape, The (1963)	Great Escape, The (1963)	Action|Adventure|Drama|War
+1112484742	0	1	OVERVIEW-PAGE	Action|Adventure|Sci-Fi	Action|Adventure|Sci-Fi
+1112484742	1	1	Star Wars: Episode V - The Empire Strikes Back (1980)	Star Wars: Episode V - The Empire Strikes Back (1980)	Action|Adventure|Sci-Fi
+1112484749	0	1	OVERVIEW-PAGE	Action|Crime	Action|Crime
+1112484749	1	1	Run Lola Run (Lola rennt) (1998)	Run Lola Run (Lola rennt) (1998)	Action|Crime
+1112484759	0	1	OVERVIEW-PAGE	Adventure|Animation|Children|Drama|Sci-Fi	Adventure|Animation|Children|Drama|Sci-Fi
+1112484759	1	1	Iron Giant, The (1999)	Iron Giant, The (1999)	Adventure|Animation|Children|Drama|Sci-Fi
+1112484767	0	1	OVERVIEW-PAGE	Comedy|Crime|Drama|Thriller	Comedy|Crime|Drama|Thriller
+1112484767	1	1	Pulp Fiction (1994)	Pulp Fiction (1994)	Comedy|Crime|Drama|Thriller
+1112484789	0	1	OVERVIEW-PAGE	Action|Drama|Thriller	Action|Drama|Thriller
+1112484789	1	1	Kill Bill: Vol. 2 (2004)	Kill Bill: Vol. 2 (2004)	Action|Drama|Thriller
+1112484795	0	1	OVERVIEW-PAGE	Comedy|Drama|Sci-Fi|War	Comedy|Drama|Sci-Fi|War
+1112484795	1	1	Slaughterhouse-Five (1972)	Slaughterhouse-Five (1972)	Comedy|Drama|Sci-Fi|War
+1112484798	0	1	OVERVIEW-PAGE	Crime|Drama	Crime|Drama
+1112484798	1	1	Shawshank Redemption, The (1994)	Shawshank Redemption, The (1994)	Crime|Drama
+1112484810	0	1	OVERVIEW-PAGE	Drama|War	Drama|War
+1112484810	1	1	Ran (1985)	Ran (1985)	Drama|War
+1112484815	0	1	OVERVIEW-PAGE	Action|Drama|War	Action|Drama|War
+1112484815	1	1	Apocalypse Now (1979)	Apocalypse Now (1979)	Action|Drama|War
+1112484819	0	1	OVERVIEW-PAGE	Mystery|Sci-Fi|Thriller	Mystery|Sci-Fi|Thriller
+1112484819	1	1	Twelve Monkeys (a.k.a. 12 Monkeys) (1995)	Twelve Monkeys (a.k.a. 12 Monkeys) (1995)	Mystery|Sci-Fi|Thriller
+1112484826	0	1	OVERVIEW-PAGE	Action|Adventure|Sci-Fi	Action|Adventure|Sci-Fi
+1112484826	1	1	Star Wars: Episode IV - A New Hope (1977)	Star Wars: Episode IV - A New Hope (1977)	Action|Adventure|Sci-Fi
+1112484913	0	1	OVERVIEW-PAGE	Action|Horror	Action|Horror
+1112484913	1	1	Jaws (1975)	Jaws (1975)	Action|Horror
+1112484918	0	1	OVERVIEW-PAGE	Drama|Horror|Thriller	Drama|Horror|Thriller
+1112484918	1	1	Misery (1990)	Misery (1990)	Drama|Horror|Thriller
+1112484933	0	1	OVERVIEW-PAGE	Comedy|Horror|Thriller	Comedy|Horror|Thriller
+1112484933	1	1	Lost Boys, The (1987)	Lost Boys, The (1987)	Comedy|Horror|Thriller
+1112484940	0	1	OVERVIEW-PAGE	Drama|Horror	Drama|Horror
+1112484940	1	1	Interview with the Vampire: The Vampire Chronicles (1994)	Interview with the Vampire: The Vampire Chronicles (1994)	Drama|Horror
+1112484983	0	1	OVERVIEW-PAGE	Drama|Horror|Mystery|Thriller	Drama|Horror|Mystery|Thriller
+1112484983	1	1	Wicker Man, The (1973)	Wicker Man, The (1973)	Drama|Horror|Mystery|Thriller
+1112484990	0	1	OVERVIEW-PAGE	Horror|Thriller	Horror|Thriller
+1112484990	1	1	Birds, The (1963)	Birds, The (1963)	Horror|Thriller
+1112484994	0	1	OVERVIEW-PAGE	Horror	Horror
+1112484994	1	1	Dracula (1931)	Dracula (1931)	Horror
+1112485367	0	1	OVERVIEW-PAGE	Drama|Horror|Mystery	Drama|Horror|Mystery
+1112485367	1	1	Sixth Sense, The (1999)	Sixth Sense, The (1999)	Drama|Horror|Mystery
+1112485371	0	1	OVERVIEW-PAGE	Drama|Western	Drama|Western
+1112485371	1	1	Unforgiven (1992)	Unforgiven (1992)	Drama|Western
+1112485375	0	1	OVERVIEW-PAGE	Comedy	Comedy
+1112485375	1	1	Monty Python's Life of Brian (1979)	Monty Python's Life of Brian (1979)	Comedy
+1112485382	0	1	OVERVIEW-PAGE	Action|Crime|Romance|Thriller	Action|Crime|Romance|Thriller
+1112485382	1	1	Femme Nikita, La (Nikita) (1990)	Femme Nikita, La (Nikita) (1990)	Action|Crime|Romance|Thriller
+1112485401	0	1	OVERVIEW-PAGE	Action|Sci-Fi|Thriller	Action|Sci-Fi|Thriller
+1112485401	1	1	Terminator, The (1984)	Terminator, The (1984)	Action|Sci-Fi|Thriller
+1112485406	0	1	OVERVIEW-PAGE	Comedy|Crime|Thriller	Comedy|Crime|Thriller
+1112485406	1	1	Snatch (2000)	Snatch (2000)	Comedy|Crime|Thriller
+1112485414	0	1	OVERVIEW-PAGE	Children|Comedy	Children|Comedy
+1112485414	1	1	Christmas Story, A (1983)	Christmas Story, A (1983)	Children|Comedy
+1112485419	0	1	OVERVIEW-PAGE	Drama	Drama
+1112485419	1	1	Sling Blade (1996)	Sling Blade (1996)	Drama
+1112485433	0	1	OVERVIEW-PAGE	Action|Drama|War	Action|Drama|War
+1112485433	1	1	Dirty Dozen, The (1967)	Dirty Dozen, The (1967)	Action|Drama|War
+1112485440	0	1	OVERVIEW-PAGE	Adventure|Drama	Adventure|Drama
+1112485440	1	1	Stand by Me (1986)	Stand by Me (1986)	Adventure|Drama
+1112485447	0	1	OVERVIEW-PAGE	Comedy|Crime|Thriller	Comedy|Crime|Thriller
+1112485447	1	1	Lock, Stock & Two Smoking Barrels (1998)	Lock, Stock & Two Smoking Barrels (1998)	Comedy|Crime|Thriller
+1112485453	0	1	OVERVIEW-PAGE	Drama|War	Drama|War
+1112485453	1	1	Platoon (1986)	Platoon (1986)	Drama|War
+1112485460	0	1	OVERVIEW-PAGE	Adventure|Comedy|Crime	Adventure|Comedy|Crime
+1112485460	1	1	O Brother, Where Art Thou? (2000)	O Brother, Where Art Thou? (2000)	Adventure|Comedy|Crime
+1112485465	0	1	OVERVIEW-PAGE	Comedy	Comedy
+1112485465	1	1	Ferris Bueller's Day Off (1986)	Ferris Bueller's Day Off (1986)	Comedy
+1112485480	0	1	OVERVIEW-PAGE	Action|Crime|Thriller	Action|Crime|Thriller
+1112485480	1	1	Die Hard (1988)	Die Hard (1988)	Action|Crime|Thriller
+1112485486	0	1	OVERVIEW-PAGE	Action|Crime|Drama	Action|Crime|Drama
+1112485486	1	1	Untouchables, The (1987)	Untouchables, The (1987)	Action|Crime|Drama
+1112485493	0	1	OVERVIEW-PAGE	Action|Adventure|Sci-Fi|IMAX	Action|Adventure|Sci-Fi|IMAX
+1112485493	1	1	Spider-Man 2 (2004)	Spider-Man 2 (2004)	Action|Adventure|Sci-Fi|IMAX
+1112485502	0	1	OVERVIEW-PAGE	Action|Adventure|Sci-Fi|Thriller	Action|Adventure|Sci-Fi|Thriller
+1112485502	1	1	X2: X-Men United (2003)	X2: X-Men United (2003)	Action|Adventure|Sci-Fi|Thriller
+1112485508	0	1	OVERVIEW-PAGE	Action|Adventure|Comedy|Fantasy	Action|Adventure|Comedy|Fantasy
+1112485508	1	1	Pirates of the Caribbean: The Curse of the Black Pearl (2003)	Pirates of the Caribbean: The Curse of the Black Pearl (2003)	Action|Adventure|Comedy|Fantasy
+1112485525	0	1	OVERVIEW-PAGE	Action|Adventure	Action|Adventure
+1112485525	1	1	Indiana Jones and the Last Crusade (1989)	Indiana Jones and the Last Crusade (1989)	Action|Adventure
+1112485557	0	1	OVERVIEW-PAGE	Action|Sci-Fi	Action|Sci-Fi
+1112485557	1	1	Terminator 2: Judgment Day (1991)	Terminator 2: Judgment Day (1991)	Action|Sci-Fi
+1112485563	0	1	OVERVIEW-PAGE	Western	Western
+1112485563	1	1	Little Big Man (1970)	Little Big Man (1970)	Western
+1112485567	0	1	OVERVIEW-PAGE	Comedy|Drama	Comedy|Drama
+1112485567	1	1	Rosencrantz and Guildenstern Are Dead (1990)	Rosencrantz and Guildenstern Are Dead (1990)	Comedy|Drama
+1112485573	0	1	OVERVIEW-PAGE	Comedy	Comedy
+1112485573	1	1	Clerks (1994)	Clerks (1994)	Comedy
+1112485580	0	1	OVERVIEW-PAGE	Action|Adventure|Thriller	Action|Adventure|Thriller
+1112485580	1	1	Goldfinger (1964)	Goldfinger (1964)	Action|Adventure|Thriller
+1112485629	0	1	OVERVIEW-PAGE	Action|Adventure|Animation|Children|Comedy	Action|Adventure|Animation|Children|Comedy
+1112485629	1	1	Incredibles, The (2004)	Incredibles, The (2004)	Action|Adventure|Animation|Children|Comedy
+1112485688	0	1	OVERVIEW-PAGE	Adventure|Fantasy|IMAX	Adventure|Fantasy|IMAX
+1112485688	1	1	Harry Potter and the Prisoner of Azkaban (2004)	Harry Potter and the Prisoner of Azkaban (2004)	Adventure|Fantasy|IMAX
+1112485697	0	1	OVERVIEW-PAGE	Adventure|Fantasy	Adventure|Fantasy
+1112485697	1	1	Excalibur (1981)	Excalibur (1981)	Adventure|Fantasy
+1112485701	0	1	OVERVIEW-PAGE	Children|Drama|Sci-Fi	Children|Drama|Sci-Fi
+1112485701	1	1	E.T. the Extra-Terrestrial (1982)	E.T. the Extra-Terrestrial (1982)	Children|Drama|Sci-Fi
+1112485705	0	1	OVERVIEW-PAGE	Adventure|Fantasy	Adventure|Fantasy
+1112485705	1	1	Dark Crystal, The (1982)	Dark Crystal, The (1982)	Adventure|Fantasy
+1112485713	0	1	OVERVIEW-PAGE	Animation|Children|Fantasy	Animation|Children|Fantasy
+1112485713	1	1	Last Unicorn, The (1982)	Last Unicorn, The (1982)	Animation|Children|Fantasy
+1112485720	0	1	OVERVIEW-PAGE	Adventure|Fantasy	Adventure|Fantasy
+1112485720	1	1	Harry Potter and the Chamber of Secrets (2002)	Harry Potter and the Chamber of Secrets (2002)	Adventure|Fantasy
+1112485731	0	1	OVERVIEW-PAGE	Adventure|Children|Fantasy	Adventure|Children|Fantasy
+1112485731	1	1	Harry Potter and the Sorcerer's Stone (a.k.a. Harry Potter and the Philosopher's Stone) (2001)	Harry Potter and the Sorcerer's Stone (a.k.a. Harry Potter and the Philosopher's Stone) (2001)	Adventure|Children|Fantasy
+1112485734	0	1	OVERVIEW-PAGE	Adventure|Fantasy|Romance	Adventure|Fantasy|Romance
+1112485734	1	1	Ladyhawke (1985)	Ladyhawke (1985)	Adventure|Fantasy|Romance
+1112485739	0	1	OVERVIEW-PAGE	Adventure|Fantasy|Musical	Adventure|Fantasy|Musical
+1112485739	1	1	Labyrinth (1986)	Labyrinth (1986)	Adventure|Fantasy|Musical
+1112485748	0	1	OVERVIEW-PAGE	Action|Fantasy|Horror|Thriller	Action|Fantasy|Horror|Thriller
+1112485748	1	1	Constantine (2005)	Constantine (2005)	Action|Fantasy|Horror|Thriller
+1112485753	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy	Action|Adventure|Fantasy
+1112485753	1	1	Willow (1988)	Willow (1988)	Action|Adventure|Fantasy
+1112485781	0	1	OVERVIEW-PAGE	Drama|Fantasy|Horror	Drama|Fantasy|Horror
+1112485781	1	1	Picture of Dorian Gray, The (1945)	Picture of Dorian Gray, The (1945)	Drama|Fantasy|Horror
+1112485786	0	1	OVERVIEW-PAGE	Fantasy|Horror|Sci-Fi|Thriller	Fantasy|Horror|Sci-Fi|Thriller
+1112485786	1	1	Videodrome (1983)	Videodrome (1983)	Fantasy|Horror|Sci-Fi|Thriller
+1112485789	0	1	OVERVIEW-PAGE	Adventure|Animation|Children|Drama|Fantasy	Adventure|Animation|Children|Drama|Fantasy
+1112485789	1	1	Watership Down (1978)	Watership Down (1978)	Adventure|Animation|Children|Drama|Fantasy
+1112485816	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy	Action|Adventure|Fantasy
+1112485816	1	1	7th Voyage of Sinbad, The (1958)	7th Voyage of Sinbad, The (1958)	Action|Adventure|Fantasy
+1112485819	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy	Action|Adventure|Fantasy
+1112485819	1	1	Jason and the Argonauts (1963)	Jason and the Argonauts (1963)	Action|Adventure|Fantasy
+1112485822	0	1	OVERVIEW-PAGE	Adventure|Comedy|Fantasy	Adventure|Comedy|Fantasy
+1112485822	1	1	Adventures of Baron Munchausen, The (1988)	Adventures of Baron Munchausen, The (1988)	Adventure|Comedy|Fantasy
+1112485825	0	1	OVERVIEW-PAGE	Adventure|Comedy|Fantasy|Sci-Fi	Adventure|Comedy|Fantasy|Sci-Fi
+1112485825	1	1	Time Bandits (1981)	Time Bandits (1981)	Adventure|Comedy|Fantasy|Sci-Fi
+1112485834	0	1	OVERVIEW-PAGE	Children|Fantasy	Children|Fantasy
+1112485834	1	1	Witches, The (1990)	Witches, The (1990)	Children|Fantasy
+1112485843	0	1	OVERVIEW-PAGE	Comedy|Fantasy	Comedy|Fantasy
+1112485843	1	1	Beetlejuice (1988)	Beetlejuice (1988)	Comedy|Fantasy
+1112485858	0	1	OVERVIEW-PAGE	Action|Mystery|Thriller	Action|Mystery|Thriller
+1112485858	1	1	Brotherhood of the Wolf (Pacte des loups, Le) (2001)	Brotherhood of the Wolf (Pacte des loups, Le) (2001)	Action|Mystery|Thriller
+1112485871	0	1	OVERVIEW-PAGE	Fantasy|Horror	Fantasy|Horror
+1112485871	1	1	Company of Wolves, The (1984)	Company of Wolves, The (1984)	Fantasy|Horror
+1112485880	0	1	OVERVIEW-PAGE	Adventure|Comedy|Sci-Fi	Adventure|Comedy|Sci-Fi
+1112485880	1	1	Bill & Ted's Excellent Adventure (1989)	Bill & Ted's Excellent Adventure (1989)	Adventure|Comedy|Sci-Fi
+1112485887	0	1	OVERVIEW-PAGE	Adventure|Fantasy|Sci-Fi	Adventure|Fantasy|Sci-Fi
+1112485887	1	1	Navigator: A Mediaeval Odyssey, The (1988)	Navigator: A Mediaeval Odyssey, The (1988)	Adventure|Fantasy|Sci-Fi
+1112485898	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy	Action|Adventure|Fantasy
+1112485898	1	1	Dragonslayer (1981)	Dragonslayer (1981)	Action|Adventure|Fantasy
+1112485905	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy|Romance	Action|Adventure|Fantasy|Romance
+1112485905	1	1	Clash of the Titans (1981)	Clash of the Titans (1981)	Action|Adventure|Fantasy|Romance
+1112485923	0	1	OVERVIEW-PAGE	Action|Adventure|Children|Fantasy	Action|Adventure|Children|Fantasy
+1112485923	1	1	Peter Pan (2003)	Peter Pan (2003)	Action|Adventure|Children|Fantasy
+1112485929	0	1	OVERVIEW-PAGE	Adventure|Sci-Fi	Adventure|Sci-Fi
+1112485929	1	1	Dune (1984)	Dune (1984)	Adventure|Sci-Fi
+1112485934	0	1	OVERVIEW-PAGE	Comedy|Fantasy|Horror|Thriller	Comedy|Fantasy|Horror|Thriller
+1112485934	1	1	Witches of Eastwick, The (1987)	Witches of Eastwick, The (1987)	Comedy|Fantasy|Horror|Thriller
+1112485951	0	1	OVERVIEW-PAGE	Adventure|Fantasy|Romance	Adventure|Fantasy|Romance
+1112485951	1	1	Legend (1985)	Legend (1985)	Adventure|Fantasy|Romance
+1112485955	0	1	OVERVIEW-PAGE	Comedy|Fantasy|Romance	Comedy|Fantasy|Romance
+1112485955	1	1	Splash (1984)	Splash (1984)	Comedy|Fantasy|Romance
+1112485958	0	1	OVERVIEW-PAGE	Adventure|Children|Comedy|Fantasy|Musical	Adventure|Children|Comedy|Fantasy|Musical
+1112485958	1	1	Chitty Chitty Bang Bang (1968)	Chitty Chitty Bang Bang (1968)	Adventure|Children|Comedy|Fantasy|Musical
+1112485961	0	1	OVERVIEW-PAGE	Adventure|Comedy|Fantasy	Adventure|Comedy|Fantasy
+1112485961	1	1	Jabberwocky (1977)	Jabberwocky (1977)	Adventure|Comedy|Fantasy
+1112485970	0	1	OVERVIEW-PAGE	Adventure|Animation|Fantasy|Sci-Fi	Adventure|Animation|Fantasy|Sci-Fi
+1112485970	1	1	Final Fantasy: The Spirits Within (2001)	Final Fantasy: The Spirits Within (2001)	Adventure|Animation|Fantasy|Sci-Fi
+1112485980	0	1	OVERVIEW-PAGE	Action|Comedy|Crime|Fantasy	Action|Comedy|Crime|Fantasy
+1112485980	1	1	Mask, The (1994)	Mask, The (1994)	Action|Comedy|Crime|Fantasy
+1112485984	0	1	OVERVIEW-PAGE	Action|Fantasy|Horror	Action|Fantasy|Horror
+1112485984	1	1	Underworld (2003)	Underworld (2003)	Action|Fantasy|Horror
+1112485988	0	1	OVERVIEW-PAGE	Action|Adventure|Sci-Fi	Action|Adventure|Sci-Fi
+1112485988	1	1	Star Wars: Episode I - The Phantom Menace (1999)	Star Wars: Episode I - The Phantom Menace (1999)	Action|Adventure|Sci-Fi
+1112486002	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy	Action|Adventure|Fantasy
+1112486002	1	1	Sword and the Sorcerer, The (1982)	Sword and the Sorcerer, The (1982)	Action|Adventure|Fantasy
+1112486007	0	1	OVERVIEW-PAGE	Action|Adventure|Sci-Fi	Action|Adventure|Sci-Fi
+1112486007	1	1	Flash Gordon (1980)	Flash Gordon (1980)	Action|Adventure|Sci-Fi
+1112486013	0	1	OVERVIEW-PAGE	Adventure|Children|Fantasy	Adventure|Children|Fantasy
+1112486013	1	1	Escape to Witch Mountain (1975)	Escape to Witch Mountain (1975)	Adventure|Children|Fantasy
+1112486024	0	1	OVERVIEW-PAGE	Adventure|Comedy|Fantasy	Adventure|Comedy|Fantasy
+1112486024	1	1	Hook (1991)	Hook (1991)	Adventure|Comedy|Fantasy
+1112486027	0	1	OVERVIEW-PAGE	Adventure|Children|Fantasy	Adventure|Children|Fantasy
+1112486027	1	1	Jumanji (1995)	Jumanji (1995)	Adventure|Children|Fantasy
+1112486032	0	1	OVERVIEW-PAGE	Adventure|Children|Comedy|Fantasy	Adventure|Children|Comedy|Fantasy
+1112486032	1	1	Borrowers, The (1997)	Borrowers, The (1997)	Adventure|Children|Comedy|Fantasy
+1112486045	0	1	OVERVIEW-PAGE	Adventure|Fantasy	Adventure|Fantasy
+1112486045	1	1	One Million Years B.C. (1966)	One Million Years B.C. (1966)	Adventure|Fantasy
+1112486055	0	1	OVERVIEW-PAGE	Adventure|Comedy|Fantasy|Sci-Fi	Adventure|Comedy|Fantasy|Sci-Fi
+1112486055	1	1	Bill & Ted's Bogus Journey (1991)	Bill & Ted's Bogus Journey (1991)	Adventure|Comedy|Fantasy|Sci-Fi
+1112486060	0	1	OVERVIEW-PAGE	Comedy|Fantasy|Romance	Comedy|Fantasy|Romance
+1112486060	1	1	Wilder Napalm (1993)	Wilder Napalm (1993)	Comedy|Fantasy|Romance
+1112486076	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy	Action|Adventure|Fantasy
+1112486076	1	1	Beastmaster, The (1982)	Beastmaster, The (1982)	Action|Adventure|Fantasy
+1112486086	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy	Action|Adventure|Fantasy
+1112486086	1	1	Conan the Destroyer (1984)	Conan the Destroyer (1984)	Action|Adventure|Fantasy
+1112486094	0	1	OVERVIEW-PAGE	Action|Children|Comedy|Fantasy|Sci-Fi	Action|Children|Comedy|Fantasy|Sci-Fi
+1112486094	1	1	Teenage Mutant Ninja Turtles (1990)	Teenage Mutant Ninja Turtles (1990)	Action|Children|Comedy|Fantasy|Sci-Fi
+1112486098	0	1	OVERVIEW-PAGE	Animation|Children|Fantasy|War	Animation|Children|Fantasy|War
+1112486098	1	1	Small Soldiers (1998)	Small Soldiers (1998)	Animation|Children|Fantasy|War
+1112486104	0	1	OVERVIEW-PAGE	Action|Adventure|Sci-Fi	Action|Adventure|Sci-Fi
+1112486104	1	1	Time Machine, The (2002)	Time Machine, The (2002)	Action|Adventure|Sci-Fi
+1112486108	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy|Horror	Action|Adventure|Fantasy|Horror
+1112486108	1	1	Van Helsing (2004)	Van Helsing (2004)	Action|Adventure|Fantasy|Horror
+1112486122	0	1	OVERVIEW-PAGE	Comedy|Fantasy	Comedy|Fantasy
+1112486122	1	1	Toys (1992)	Toys (1992)	Comedy|Fantasy
+1112486127	0	1	OVERVIEW-PAGE	Comedy|Horror	Comedy|Horror
+1112486127	1	1	Scary Movie 3 (2003)	Scary Movie 3 (2003)	Comedy|Horror
+1112486138	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy	Action|Adventure|Fantasy
+1112486138	1	1	Highlander: Endgame (Highlander IV) (2000)	Highlander: Endgame (Highlander IV) (2000)	Action|Adventure|Fantasy
+1112486150	0	1	OVERVIEW-PAGE	Action|Adventure|Children|Fantasy	Action|Adventure|Children|Fantasy
+1112486150	1	1	Warriors of Virtue (1997)	Warriors of Virtue (1997)	Action|Adventure|Children|Fantasy
+1112486150	0	1	OVERVIEW-PAGE	Action|Adventure|Animation|Fantasy|Sci-Fi	Action|Adventure|Animation|Fantasy|Sci-Fi
+1112486150	1	1	Heavy Metal 2000 (2000)	Heavy Metal 2000 (2000)	Action|Adventure|Animation|Fantasy|Sci-Fi
+1112486163	0	1	OVERVIEW-PAGE	Drama|Horror|Thriller	Drama|Horror|Thriller
+1112486163	1	1	Godsend (2004)	Godsend (2004)	Drama|Horror|Thriller
+1112486169	0	1	OVERVIEW-PAGE	Action|Adventure|Fantasy|Sci-Fi	Action|Adventure|Fantasy|Sci-Fi
+1112486169	1	1	Masters of the Universe (1987)	Masters of the Universe (1987)	Action|Adventure|Fantasy|Sci-Fi
+1112486192	0	1	OVERVIEW-PAGE	Adventure|Fantasy	Adventure|Fantasy
+1112486192	1	1	Dungeons & Dragons (2000)	Dungeons & Dragons (2000)	Adventure|Fantasy
+1112486201	0	1	OVERVIEW-PAGE	Adventure|Children|Fantasy|Sci-Fi	Adventure|Children|Fantasy|Sci-Fi
+1112486201	1	1	Star Kid (1997)	Star Kid (1997)	Adventure|Children|Fantasy|Sci-Fi
+990969532	0	16	OVERVIEW-PAGE	Action|Crime|Thriller	Action|Crime|Thriller
+990969532	1	16	Heat (1995)	Heat (1995)	Action|Crime|Thriller
+990969571	0	16	OVERVIEW-PAGE	Comedy|Drama|Romance	Comedy|Drama|Romance
+990969571	1	16	About Last Night... (1986)	About Last Night... (1986)	Comedy|Drama|Romance
+990969571	0	16	OVERVIEW-PAGE	Drama|Thriller	Drama|Thriller
+990969571	1	16	Fatal Attraction (1987)	Fatal Attraction (1987)	Drama|Thriller
+990969571	0	16	OVERVIEW-PAGE	Adventure|Drama|Thriller	Adventure|Drama|Thriller
+990969571	1	16	Lord of the Flies (1963)	Lord of the Flies (1963)	Adventure|Drama|Thriller
+990969593	0	16	OVERVIEW-PAGE	Comedy|Drama|Romance	Comedy|Drama|Romance
+990969593	1	16	Shakespeare in Love (1998)	Shakespeare in Love (1998)	Comedy|Drama|Romance
+990969593	0	16	OVERVIEW-PAGE	Comedy	Comedy
+990969593	1	16	Fletch Lives (1989)	Fletch Lives (1989)	Comedy
+990969672	0	16	OVERVIEW-PAGE	Adventure|Comedy|Fantasy	Adventure|Comedy|Fantasy
+990969672	1	16	Monty Python and the Holy Grail (1975)	Monty Python and the Holy Grail (1975)	Adventure|Comedy|Fantasy
+990969672	0	16	OVERVIEW-PAGE	Action|Comedy	Action|Comedy
+990969672	1	16	I'm Gonna Git You Sucka (1988)	I'm Gonna Git You Sucka (1988)	Action|Comedy
+990969709	0	16	OVERVIEW-PAGE	Comedy|Fantasy	Comedy|Fantasy
+990969709	1	16	Drop Dead Fred (1991)	Drop Dead Fred (1991)	Comedy|Fantasy
+990969709	0	16	OVERVIEW-PAGE	Comedy|Drama	Comedy|Drama
+990969709	1	16	Empire Records (1995)	Empire Records (1995)	Comedy|Drama
+990969738	0	16	OVERVIEW-PAGE	Action|Comedy|Sci-Fi	Action|Comedy|Sci-Fi
+990969738	1	16	Ghostbusters (a.k.a. Ghost Busters) (1984)	Ghostbusters (a.k.a. Ghost Busters) (1984)	Action|Comedy|Sci-Fi
+990969738	0	16	OVERVIEW-PAGE	Comedy	Comedy
+990969738	1	16	Ferris Bueller's Day Off (1986)	Ferris Bueller's Day Off (1986)	Comedy
+990969738	0	16	OVERVIEW-PAGE	Action|Adventure|Comedy|Fantasy|Romance	Action|Adventure|Comedy|Fantasy|Romance
+990969738	1	16	Princess Bride, The (1987)	Princess Bride, The (1987)	Action|Adventure|Comedy|Fantasy|Romance
+990969738	0	16	OVERVIEW-PAGE	Comedy|Romance	Comedy|Romance
+990969738	1	16	Sabrina (1954)	Sabrina (1954)	Comedy|Romance
+990969738	0	16	OVERVIEW-PAGE	Comedy	Comedy
+990969738	1	16	Father of the Bride (1950)	Father of the Bride (1950)	Comedy
+990969772	0	16	OVERVIEW-PAGE	Comedy	Comedy
+990969772	1	16	Airplane! (1980)	Airplane! (1980)	Comedy
+990969772	0	16	OVERVIEW-PAGE	Comedy|Drama	Comedy|Drama
+990969772	1	16	American Beauty (1999)	American Beauty (1999)	Comedy|Drama
+990969772	0	16	OVERVIEW-PAGE	Adventure|Animation|Children|Comedy|Fantasy	Adventure|Animation|Children|Comedy|Fantasy
+990969772	1	16	Toy Story (1995)	Toy Story (1995)	Adventure|Animation|Children|Comedy|Fantasy
+990969772	0	16	OVERVIEW-PAGE	Comedy|Romance	Comedy|Romance
+990969772	1	16	When Harry Met Sally... (1989)	When Harry Met Sally... (1989)	Comedy|Romance
