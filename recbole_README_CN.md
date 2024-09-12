@@ -20,7 +20,7 @@
 [论文]: https://arxiv.org/abs/2011.01731
 [博客]: https://blog.csdn.net/Turinger_2000/article/details/111182852
 [模型列表]: https://github.com/RUCAIBox/RecBole2.0/blob/main/model_list.md
-[English Version]: README.md
+[English Version]: recbole_README
 
 
 RecBole 是一个基于 PyTorch 实现的，面向研究者的，易于开发与复现的，统一、全面、高效的推荐系统代码库。
