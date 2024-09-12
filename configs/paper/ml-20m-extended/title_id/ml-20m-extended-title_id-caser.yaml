@@ -1,0 +1,78 @@
+model: CaserAttr
+embedding_size: 64
+dropout_prob: 0.4
+reg_weight: 1e-4
+L: 5
+nv: 4
+nh: 8
+loss_type: CE
+gpu_id: 0
+use_gpu: true
+seed: 212
+state: DEBUG
+reproducibility: true
+data_path: /ssd/dataset/
+show_progress: true
+save_dataset: false
+save_dataloaders: false
+log_wandb: true
+load_col:
+  inter:
+  - userId
+  - timestamp
+  - title
+  - genres
+  - title_genres
+  - item_id_type
+  item:
+  - title
+  - item_id_type
+seq_separator: '|'
+seq_len:
+  genres: 6
+MAX_ITEM_LIST_LENGTH: 200
+USER_ID_FIELD: userId
+RATING_FIELD: rating
+TIME_FIELD: timestamp
+val_interval: null
+filter_inter_by_user_or_item: false
+user_inter_num_interval: '[5,inf)'
+item_inter_num_interval: '[5,inf)'
+epochs: 100
+train_batch_size: 64
+train_neg_sample_args: null
+learner: adam
+learning_rate: 0.001
+eval_step: 5
+stopping_step: 10
+clip_grad_norm: null
+weight_decay: 0.001
+benchmark_filename:
+- train
+- validation
+- test
+eval_args:
+  item_id: item_id_type
+  group_by: user
+  order: TO
+  mode: full
+repeatable: true
+metrics:
+- Recall
+- NDCG
+- MRR
+topk:
+- 1
+- 5
+- 10
+- 20
+valid_metric: Recall@10
+valid_metric_bigger: true
+eval_batch_size: 64
+valid_batch_size: 64
+loss_decimal_place: 4
+metric_decimal_place: 4
+checkpoint_dir: /home/ls6/fischer/plp-paper/recbole/ml-20m-extended/caser/title_id/
+ITEM_ID_FIELD: title
+wandb_name: ml-20m-extended-title_id-caser
+wandb_project: plp-ml-20m

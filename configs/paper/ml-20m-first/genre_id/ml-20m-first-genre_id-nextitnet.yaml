@@ -1,0 +1,78 @@
+model: NextItNetAttr
+embedding_size: 64
+kernel_size: 3
+block_num: 5
+dilations:
+- 1
+- 4
+reg_weight: 1e-5
+loss_type: CE
+gpu_id: 0
+use_gpu: true
+seed: 42
+state: DEBUG
+reproducibility: true
+data_path: /ssd/dataset/
+show_progress: true
+save_dataset: false
+save_dataloaders: false
+log_wandb: true
+load_col:
+  inter:
+  - userId
+  - timestamp
+  - genres
+  - title_genres
+  - item_id_type
+  item:
+  - title_genres
+  - item_id_type
+seq_separator: '|'
+seq_len:
+  genres: 6
+MAX_ITEM_LIST_LENGTH: 200
+USER_ID_FIELD: userId
+RATING_FIELD: rating
+TIME_FIELD: timestamp
+val_interval: null
+filter_inter_by_user_or_item: false
+user_inter_num_interval: '[5,inf)'
+item_inter_num_interval: '[5,inf)'
+epochs: 100
+train_batch_size: 64
+train_neg_sample_args: null
+learner: adam
+learning_rate: 0.001
+eval_step: 5
+stopping_step: 10
+clip_grad_norm: null
+weight_decay: 0.001
+benchmark_filename:
+- train
+- validation
+- test
+eval_args:
+  item_id: item_id_type
+  group_by: user
+  order: TO
+  mode: full
+repeatable: true
+metrics:
+- Recall
+- NDCG
+- MRR
+topk:
+- 1
+- 5
+- 10
+- 20
+valid_metric: Recall@10
+valid_metric_bigger: true
+eval_batch_size: 64
+valid_batch_size: 64
+loss_decimal_place: 4
+metric_decimal_place: 4
+checkpoint_dir: /home/ls6/fischer/plp-paper/recbole/ml-20m-first/genre_id/varfix/42/
+ITEM_ID_FIELD: title_genres
+wandb_name: ml-20m-first-genre_id-nextitnet
+wandb_project: plp-ml-20m
