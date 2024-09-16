@@ -11,6 +11,7 @@ It is based on the RecBole framework (https://recbole.io/).
   * data_preparation/convert_for_recbole.py converts the data to the RecBole format
 * Configs are provided in configs/paper/ for the experiments in the paper. 
 * You can run them with `python run_recbole.py --model='model_name' --dataset='dataset_name' --config_files 'path_to_config'`
+* a notebook for the hyptrails experiments is provided in notebooks/
 
 ### Non-Item Models
 Our non-item models can be found in recbole/model/sequential_attribute_recommender.
