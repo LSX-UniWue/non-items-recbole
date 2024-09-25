@@ -1,0 +1,83 @@
+MAX_ITEM_LIST_LENGTH: 175
+TIME_FIELD: timestamp
+USER_ID_FIELD: userId
+benchmark_filename:
+- train
+- val
+- test
+clip_grad_norm: null
+data_path: /home/ls6/fischer/datasets/kars_workshop_new/
+epochs: 50
+eval_args:
+  group_by: user
+  item_id: item_id_type
+  mode: full
+  order: TO
+eval_batch_size: 64
+eval_step: 5
+filter_inter_by_user_or_item: false
+gpu_id: 0
+item_inter_num_interval: '[5,inf)'
+items:
+  attribute_fusion: sum
+  attributes:
+    embedding:
+      embedding_type: vector
+      len: 384
+      mask: 0
+      pad: 0
+      size: 384
+  attributes_listpage_only: false
+  item_id_type_settings:
+    extra_embbedding: false
+    name: item_id_type
+learner: adam
+learning_rate: 0.001
+load_col:
+  inter:
+  - timestamp
+  - item_id_type
+  - userId
+  - title
+  - embedding
+  - message
+  - detailed_item_id_type
+  item:
+  - item_id_type
+  - title
+log_wandb: true
+loss_decimal_place: 4
+metric_decimal_place: 4
+metrics:
+- Recall
+- NDCG
+- MRR
+repeatable: true
+reproducibility: true
+save_dataloaders: false
+save_dataset: false
+seed: 212
+seq_len:
+  embedding: 384
+seq_separator: ','
+show_progress: true
+state: INFO
+stopping_step: 10
+subsequences_end_with_items: true
+test_subsequences: true
+topk:
+- 1
+- 5
+- 10
+- 20
+train_batch_size: 64
+train_neg_sample_args: null
+train_subsequences: true
+use_gpu: true
+user_inter_num_interval: '[5,inf)'
+val_interval: null
+valid_batch_size: 64
+valid_metric: Recall@10
+valid_metric_bigger: true
+wandb_entity: lsx-reco
+weight_decay: 0.001

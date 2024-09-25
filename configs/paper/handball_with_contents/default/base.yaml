@@ -1,0 +1,72 @@
+# general
+gpu_id: 0
+use_gpu: True
+seed: 212
+state: INFO
+reproducibility: True
+data_path: '/home/ls6/fischer/datasets/kars_workshop_new/'
+show_progress: True
+save_dataset: False
+save_dataloaders: False
+log_wandb: True
+#model
+# dataset
+load_col:
+ inter: [timestamp, item_id_type, userId, title, embedding, message, detailed_item_id_type]
+ item: [item_id_type, title]
+seq_separator: ','
+MAX_ITEM_LIST_LENGTH: 175
+USER_ID_FIELD: userId
+TIME_FIELD: timestamp
+seq_len:
+  embedding: 384
+items:
+  attribute_fusion: 'sum'
+  attributes_listpage_only: False
+  item_id_type_settings:
+    name: "item_id_type"
+    extra_embbedding: false
+  attributes:
+    embedding:
+      embedding_type: 'vector'
+      len: 384
+      size: 384 # Mit angeben, wenn nicht 1
+      pad: 0
+      mask: 0
+      
+# Filtering
+val_interval: ~
+filter_inter_by_user_or_item: False
+user_inter_num_interval: "[5,inf)"
+item_inter_num_interval: "[5,inf)"
+
+# training settings
+epochs: 50
+train_batch_size: 64
+train_neg_sample_args: null
+learner: adam
+learning_rate: 0.001
+eval_step: 5
+stopping_step: 10
+clip_grad_norm: ~
+weight_decay: 0.001
+
+# evaluation settings
+benchmark_filename: ["train","val","test"]
+eval_args:
+  group_by: user
+  item_id: item_id_type
+  order: TO
+  mode: full
+
+repeatable: True
+metrics: ["Recall","NDCG","MRR"]
+topk: [1,5,10,20]
+valid_metric: Recall@10
+valid_metric_bigger: True
+eval_batch_size: 64
+valid_batch_size: 64
+loss_decimal_place: 4
+metric_decimal_place: 4
+
+wandb_entity: lsx-reco
