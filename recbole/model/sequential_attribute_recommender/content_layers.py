@@ -107,7 +107,7 @@ def concat_user_embeddings(user_attributes, embedded_user_features, item_seq_emb
         merge = user_attributes.get("attribute_fusion", None)
         user_embedding_list = list(embedded_user_features.values())
         user_embedding = user_embedding_list[0][:, 0:1, :]  # get the first user embedding
-        for i in range(1, len(user_embedding_list) - 1):
+        for i in range(1, len(user_embedding_list)):
             if merge == "sum":
                 user_embedding = user_embedding + user_embedding_list[i][:, 0:1, :]
             if merge == "multiply":

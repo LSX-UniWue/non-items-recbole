@@ -191,7 +191,7 @@ class BERT4RecAttr(SequentialRecommender):
 
 
         item_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_emb)
-        embedded_user_features = embed_attributes(interaction, self.user_attributes, self.attribute_embeddings)
+        embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
         item_emb = concat_user_embeddings(self.user_attributes,embedded_user_features, item_emb)
         input_emb = item_emb + position_embedding
         input_emb = self.LayerNorm(input_emb)

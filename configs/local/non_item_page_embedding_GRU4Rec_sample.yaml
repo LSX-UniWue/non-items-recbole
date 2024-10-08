@@ -38,6 +38,14 @@ items:
     genres: #name of the attribute
       embedding_type: 'multihot' #multi-hot encoding
 
+users:
+  attribute_fusion: 'sum' #fusion function for attributes
+  attributes: #list all attributes with their embeddings
+    genres: #name of the attribute
+      embedding_type: 'multihot' #multi-hot encoding
+    item_id_type: #name of the attribute
+      embedding_type: 'float'
+
 # dataset
 load_col:
   inter:

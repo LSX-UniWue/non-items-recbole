@@ -45,7 +45,7 @@ class COREAttr(CORE):
                                              use_masked_sequence=False, pad_values=self.pad_dict)
         item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb)
 
-        embedded_user_features = embed_attributes(interaction, self.user_attributes, self.attribute_embeddings)
+        embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
         item_seq_emb = concat_user_embeddings(self.user_attributes,embedded_user_features, item_seq_emb)
 
         x = self.sess_dropout(item_seq_emb)
