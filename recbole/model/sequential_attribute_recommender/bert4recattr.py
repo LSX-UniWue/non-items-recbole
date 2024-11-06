@@ -68,14 +68,29 @@ class BERT4RecAttr(SequentialRecommender):
         self.use_masked_features = True if not hasattr(config,"use_masked_features") else config["use_masked_features"]
         # load dataset info
         self.mask_token = self.n_items
-        self.mask_item_length = int(self.mask_ratio * self.max_seq_length)
+
+        self.item_attributes = config["items"]
+        self.user_attributes = config["users"]
+        self.attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.item_attributes,
+                                                                self.hidden_size, masking=True)
+        self.user_attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.user_attributes,
+                                                                     self.hidden_size)
+        self.mask_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="mask")
+        self.pad_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="pad")
+        if self.user_attributes is not None:
+            self.final_seq_length = self.max_seq_length + 1
+        else:
+            self.final_seq_length = self.max_seq_length
+
+
+        self.mask_item_length = int(self.mask_ratio * self.final_seq_length)
 
         # define layers and loss
         self.item_embedding = nn.Embedding(
             self.n_items + 1, self.hidden_size, padding_idx=0
         )  # mask token add 1
         self.position_embedding = nn.Embedding(
-            self.max_seq_length, self.hidden_size
+            self.final_seq_length, self.hidden_size
         )  # add mask_token at the last
         self.trm_encoder = TransformerEncoder(
             n_layers=self.n_layers,
@@ -101,17 +116,7 @@ class BERT4RecAttr(SequentialRecommender):
         except AssertionError:
             raise AssertionError("Make sure 'loss_type' in [ 'CE']!")
 
-        self.item_attributes = config["items"]
-        self.user_attributes = config["users"]
-        self.attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.item_attributes,
-                                                                self.hidden_size, masking=True)
-        self.user_attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.user_attributes,
-                                                                     self.hidden_size)
-        self.mask_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="mask")
-        self.pad_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="pad")
-
         self.POS_ITEMS = "Pos_" + config["ITEM_ID_FIELD"]
-
 
         # parameters initialization
         if self.init_type == "recbole_init":
@@ -152,9 +157,8 @@ class BERT4RecAttr(SequentialRecommender):
             if self.item_attributes.get("item_id_type_settings", None) is not None:
                 feature_tensor_dict[self.item_attributes["item_id_type_settings"]["name"]] = interaction[
                     self.item_attributes["item_id_type_settings"]["name"] + "_list"].clone()
-        max_seq_len = self.max_seq_length
         for sample_id, seq_len in enumerate(item_seq_len):
-            if max_seq_len == seq_len:
+            if self.max_seq_length == seq_len:
                 interaction[self.MASK_ITEM_SEQ][sample_id,] = torch.concat([item_seq[sample_id,],
                                                                             torch.tensor([self.mask_token],
                                                                                          dtype=item_seq.dtype,
@@ -180,9 +184,9 @@ class BERT4RecAttr(SequentialRecommender):
     def forward(self, interaction):
         item_seq = interaction[self.MASK_ITEM_SEQ]
         position_ids = torch.arange(
-            item_seq.size(1), dtype=torch.long, device=item_seq.device
+            self.final_seq_length, dtype=torch.long, device=item_seq.device
         )
-        position_ids = position_ids.unsqueeze(0).expand_as(item_seq)
+        position_ids = position_ids.unsqueeze(0)#.expand_as(item_seq)
         position_embedding = self.position_embedding(position_ids)
         item_emb = self.item_embedding(item_seq)
 
@@ -190,20 +194,32 @@ class BERT4RecAttr(SequentialRecommender):
                                              use_masked_sequence=self.use_masked_features, pad_values=self.pad_dict)
 
 
-        item_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_emb)
+        item_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_emb, phase="pre")
         embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
-        item_emb = concat_user_embeddings(self.user_attributes,embedded_user_features, item_emb)
+        item_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_emb)
         input_emb = item_emb + position_embedding
         input_emb = self.LayerNorm(input_emb)
         input_emb = self.dropout(input_emb)
 
+        if self.user_attributes is not None:
+            user_one = torch.zeros((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
+            item_seq = torch.concat((user_one, item_seq), dim=1)
+
         extended_attention_mask = self.get_attention_mask(item_seq, bidirectional=True)
+
         trm_output = self.trm_encoder(
             input_emb, extended_attention_mask, output_all_encoded_layers=True
-        )
-        ffn_output = self.output_ffn(trm_output[-1])
+        )[-1]
+
+        if self.user_attributes != None:
+        # cut second dim/ user embedding
+            trm_output = trm_output[:, 1:, :]
+        trm_output = merge_embedded_item_features(embedded_features, self.item_attributes, trm_output, phase="post")
+
+        ffn_output = self.output_ffn(trm_output)
         ffn_output = self.output_gelu(ffn_output)
         output = self.output_ln(ffn_output)
+
         return output  # [B L H]
 
 
