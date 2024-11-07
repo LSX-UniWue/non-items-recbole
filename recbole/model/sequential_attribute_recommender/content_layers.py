@@ -90,17 +90,15 @@ def embed_attributes(interaction, attributes_config, attribute_embeddings, use_m
     return embedded_features
 
 
-def merge_embedded_item_features(embedded_features, attributes_config, item_seq_emb, phase="pre"):
+def merge_embedded_item_features(embedded_features, attributes_config, item_seq_emb):
     if attributes_config is not None and attributes_config.get("attributes") is not None:
         merge = attributes_config.get("attribute_fusion", None)
-        fusion_phase = attributes_config.get("fusion_phase", "pre")
-        if fusion_phase == phase:
-            if merge == "sum":
-                for feature in attributes_config["attributes"]:
-                    item_seq_emb = item_seq_emb + embedded_features[feature]
-            if merge == "multiply":
-                for feature in attributes_config["attributes"]:
-                    item_seq_emb = item_seq_emb * embedded_features[feature]
+        if merge == "sum":
+            for feature in attributes_config["attributes"]:
+                item_seq_emb = item_seq_emb + embedded_features[feature]
+        if merge == "multiply":
+            for feature in attributes_config["attributes"]:
+                item_seq_emb = item_seq_emb * embedded_features[feature]
     return item_seq_emb
 
 
@@ -114,8 +112,29 @@ def concat_user_embeddings(user_attributes, embedded_user_features, item_seq_emb
                 user_embedding = user_embedding + user_embedding_list[i][:, 0:1, :]
             if merge == "multiply":
                 user_embedding = user_embedding * user_embedding_list[i][:, 0:1, :]
-        item_seq_emb = torch.concat((user_embedding, item_seq_emb), dim=1)
+            item_seq_emb = torch.concat((user_embedding, item_seq_emb), dim=1)
     return item_seq_emb
+
+def merge_user_embeddings(user_attributes, embedded_user_features, sequence = None, state = None):
+    if user_attributes is not None:
+        merge = user_attributes.get("attribute_fusion", None)
+        if sequence is not None:
+            if merge == "sum":
+                for feature in user_attributes["attributes"]:
+                    sequence = sequence + embedded_user_features[feature]
+            if merge == "multiply":
+                for feature in user_attributes["attributes"]:
+                    sequence = sequence * embedded_user_features[feature]
+            return sequence
+        if state is not None:
+            if merge == "sum":
+                for feature in user_attributes["attributes"]:
+                    state = state + embedded_user_features[feature][:, 0:1, :].squeeze(1)
+            if merge == "multiply":
+                for feature in user_attributes["attributes"]:
+                    state = state * embedded_user_features[feature][:, 0:1, :].squeeze(1)
+            return state
+
 
 
 

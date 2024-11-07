@@ -33,7 +33,9 @@ from torch.nn.init import xavier_normal_, constant_
 from recbole.model.abstract_recommender import SequentialRecommender
 from recbole.model.layers import TransformerEncoder
 from recbole.model.sequential_attribute_recommender.content_layers import create_attribute_embeddings, \
-    embed_attributes, merge_embedded_item_features, create_mask_or_pad_dict, concat_user_embeddings
+    embed_attributes, merge_embedded_item_features, create_mask_or_pad_dict, concat_user_embeddings, \
+    merge_user_embeddings
+
 
 class BERT4RecAttr(SequentialRecommender):
     """
@@ -75,13 +77,13 @@ class BERT4RecAttr(SequentialRecommender):
                                                                 self.hidden_size, masking=True)
         self.user_attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.user_attributes,
                                                                      self.hidden_size)
+        self.user_fusion = None if self.user_attributes is None else self.user_attributes.get("user_fusion", "concat")
         self.mask_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="mask")
         self.pad_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="pad")
-        if self.user_attributes is not None:
+        if self.user_fusion == "concat":
             self.final_seq_length = self.max_seq_length + 1
         else:
             self.final_seq_length = self.max_seq_length
-
 
         self.mask_item_length = int(self.mask_ratio * self.final_seq_length)
 
@@ -91,7 +93,7 @@ class BERT4RecAttr(SequentialRecommender):
         )  # mask token add 1
         self.position_embedding = nn.Embedding(
             self.final_seq_length, self.hidden_size
-        )  # add mask_token at the last
+        )
         self.trm_encoder = TransformerEncoder(
             n_layers=self.n_layers,
             n_heads=self.n_heads,
@@ -192,34 +194,30 @@ class BERT4RecAttr(SequentialRecommender):
 
         embedded_features = embed_attributes(interaction, self.item_attributes, self.attribute_embeddings,
                                              use_masked_sequence=self.use_masked_features, pad_values=self.pad_dict)
-
-
-        item_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_emb, phase="pre")
+        item_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_emb)
         embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
-        item_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_emb)
+
+        if self.user_fusion == "concat":
+            item_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_emb)
+            user_mask = torch.zeros((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
+            item_seq = torch.concat((user_mask, item_seq), dim=1)
+
         input_emb = item_emb + position_embedding
         input_emb = self.LayerNorm(input_emb)
         input_emb = self.dropout(input_emb)
 
-        if self.user_attributes is not None:
-            user_one = torch.zeros((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
-            item_seq = torch.concat((user_one, item_seq), dim=1)
-
         extended_attention_mask = self.get_attention_mask(item_seq, bidirectional=True)
-
         trm_output = self.trm_encoder(
-            input_emb, extended_attention_mask, output_all_encoded_layers=True
-        )[-1]
+            input_emb, extended_attention_mask, output_all_encoded_layers=True)[-1]
 
-        if self.user_attributes != None:
-        # cut second dim/ user embedding
-            trm_output = trm_output[:, 1:, :]
-        trm_output = merge_embedded_item_features(embedded_features, self.item_attributes, trm_output, phase="post")
+        if self.user_fusion == "post_merge":
+            trm_output = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=trm_output)
 
         ffn_output = self.output_ffn(trm_output)
         ffn_output = self.output_gelu(ffn_output)
         output = self.output_ln(ffn_output)
-
+        if self.user_fusion == "concat":
+            return output[:, 1:, :]
         return output  # [B L H]
 
 
