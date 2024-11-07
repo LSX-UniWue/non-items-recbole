@@ -90,15 +90,17 @@ def embed_attributes(interaction, attributes_config, attribute_embeddings, use_m
     return embedded_features
 
 
-def merge_embedded_item_features(embedded_features, attributes_config, item_seq_emb):
+def merge_embedded_item_features(embedded_features, attributes_config, item_seq_emb, phase="pre"):
     if attributes_config is not None and attributes_config.get("attributes") is not None:
         merge = attributes_config.get("attribute_fusion", None)
-        if merge == "sum":
-            for feature in attributes_config["attributes"]:
-                item_seq_emb = item_seq_emb + embedded_features[feature]
-        if merge == "multiply":
-            for feature in attributes_config["attributes"]:
-                item_seq_emb = item_seq_emb * embedded_features[feature]
+        fusion_phase = attributes_config.get("fusion_phase", "pre")
+        if fusion_phase == phase:
+            if merge == "sum":
+                for feature in attributes_config["attributes"]:
+                    item_seq_emb = item_seq_emb + embedded_features[feature]
+            if merge == "multiply":
+                for feature in attributes_config["attributes"]:
+                    item_seq_emb = item_seq_emb * embedded_features[feature]
     return item_seq_emb
 
 

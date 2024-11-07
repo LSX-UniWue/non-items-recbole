@@ -115,7 +115,7 @@ class CaserAttr(Caser):
         item_seq_emb = self.item_embedding(item_seq)
         embedded_features = embed_attributes(interaction, self.item_attributes, self.attribute_embeddings,
                                              use_masked_sequence=False, pad_values=self.pad_dict)
-        item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb)
+        item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb, phase="pre")
         embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
         item_seq_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_seq_emb)
 
