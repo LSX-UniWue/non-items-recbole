@@ -48,7 +48,7 @@ class CaserAttr(Caser):
     """
 
     def __init__(self, config, dataset):
-        super(Caser, self).__init__(config, dataset)
+        super(CaserAttr, self).__init__(config, dataset)
 
         # load parameters info
         self.L = config["L"]
