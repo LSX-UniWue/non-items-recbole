@@ -46,7 +46,6 @@ class SASRecAttr(SASRec):
         self.user_attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.user_attributes,
                                                                      self.hidden_size)
         self.user_fusion = None if self.user_attributes is None else self.user_attributes.get("user_fusion", "concat")
-        self.mask_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="mask")
         self.pad_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="pad")
         if self.user_fusion == "concat":
             self.final_seq_length = self.max_seq_length + 1
