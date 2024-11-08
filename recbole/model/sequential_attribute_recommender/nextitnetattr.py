@@ -28,7 +28,8 @@ from torch.nn.init import uniform_, xavier_normal_, constant_
 from recbole.model.abstract_recommender import SequentialRecommender
 from recbole.model.loss import RegLoss, BPRLoss
 from recbole.model.sequential_attribute_recommender.content_layers import create_attribute_embeddings, \
-    embed_attributes, merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict
+    embed_attributes, merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict, \
+    merge_user_embeddings
 from recbole.model.sequential_recommender import NextItNet
 
 
@@ -57,6 +58,7 @@ class NextItNetAttr(NextItNet):
         self.user_attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.user_attributes,
                                                                      self.embedding_size)
         self.pad_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="pad")
+        self.user_fusion = None if self.user_attributes is None else self.user_attributes.get("user_fusion", "concat")
         self.apply(self._init_weights)
 
     def forward(self, interaction):
@@ -67,11 +69,19 @@ class NextItNetAttr(NextItNet):
                                              use_masked_sequence=False, pad_values=self.pad_dict)
         item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb)
         embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
-        item_seq_emb = concat_user_embeddings(self.user_attributes,embedded_user_features, item_seq_emb)
+
+        if self.user_fusion == "concat":
+            item_seq_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_seq_emb)
 
         # [batch_size, seq_len, embed_size]
         # Residual locks
         dilate_outputs = self.residual_blocks(item_seq_emb)
+
+        if self.user_fusion == "post_merge":
+            dilate_outputs = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=dilate_outputs)
+        if self.user_fusion == "concat":
+            dilate_outputs = dilate_outputs[:, 1:, :]
+
         hidden = dilate_outputs[:, -1, :].view(
             -1, self.residual_channels
         )  # [batch_size, embed_size]
