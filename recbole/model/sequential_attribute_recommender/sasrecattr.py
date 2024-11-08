@@ -54,8 +54,6 @@ class SASRecAttr(SASRec):
             self.final_seq_length = self.max_seq_length
         self.position_embedding = nn.Embedding(self.final_seq_length, self.hidden_size)
 
-        self.pad_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="pad")
-
         self.apply(self._init_weights)
 
     def forward(self, interaction):
