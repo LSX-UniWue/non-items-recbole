@@ -25,7 +25,6 @@ train_subsequences: False
 
 # Item Attributes
 items:
-  fusion_phase: 'pre'
   attribute_fusion: 'sum' #fusion function for attributes
   attributes_listpage_only: True # only use attributes for non-items
   item_id_type_settings: # item_id_type marks items as actual items or non-items
@@ -35,6 +34,7 @@ items:
       embedding_type: 'multihot' #multi-hot encoding
 
 users:
+  user_fusion: "post_merge"
   attribute_fusion: 'sum' #fusion function for attributes
   attributes: #list all attributes with their embeddings
     genres: #name of the attribute

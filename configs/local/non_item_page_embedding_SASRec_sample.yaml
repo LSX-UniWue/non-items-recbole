@@ -1,5 +1,5 @@
 # Model
-model: BERT4RecAttr
+model: SASRecAttr
 n_layers: 2
 n_heads: 2
 hidden_size: 64
@@ -9,13 +9,6 @@ attn_dropout_prob: 0.2
 hidden_act: gelu
 layer_norm_eps: 1e-12
 initializer_range: 0.02
-mask_ratio: 0.2
-transform: mask_itemseqAndAttributes
-finetune: BATCH
-masking_options: ONLY_MASK
-num_of_masked_items_choice: variable_min
-min_masked_sample_bugfix: 1
-ft_ratio: 0.1
 loss_type: 'CE'
 
 #General
@@ -35,7 +28,6 @@ train_subsequences: False
 
 # Item Attributes
 items:
-  fusion_phase: 'post'
   attribute_fusion: 'sum' #fusion function for attributes
   attributes_listpage_only: True # only use attributes for non-items
   item_id_type_settings: # item_id_type marks items as actual items or non-items
@@ -46,6 +38,7 @@ items:
       len: 6
 
 users:
+  user_fusion: "post_merge"
   attribute_fusion: 'sum' #fusion function for attributes
   attributes: #list all attributes with their embeddings
     genres: #name of the attribute

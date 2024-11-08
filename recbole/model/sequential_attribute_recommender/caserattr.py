@@ -31,7 +31,8 @@ from torch.nn import functional as F
 
 from recbole.model.loss import RegLoss, BPRLoss
 from recbole.model.sequential_attribute_recommender.content_layers import create_attribute_embeddings, \
-    embed_attributes, merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict
+    embed_attributes, merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict, \
+    merge_user_embeddings
 from recbole.model.sequential_recommender import Caser
 
 
@@ -68,7 +69,8 @@ class CaserAttr(Caser):
         self.user_attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.user_attributes,
                                                                      self.embedding_size)
         self.pad_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="pad")
-        if self.user_attributes is not None:
+        self.user_fusion = None if self.user_attributes is None else self.user_attributes.get("user_fusion", "concat")
+        if self.user_fusion == "concat":
             self.vertical_kernel_size = self.max_seq_length + 1
 
         # load dataset info
@@ -115,9 +117,11 @@ class CaserAttr(Caser):
         item_seq_emb = self.item_embedding(item_seq)
         embedded_features = embed_attributes(interaction, self.item_attributes, self.attribute_embeddings,
                                              use_masked_sequence=False, pad_values=self.pad_dict)
-        item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb, phase="pre")
+        item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb)
         embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
-        item_seq_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_seq_emb)
+
+        if self.user_fusion == "concat":
+            item_seq_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_seq_emb)
 
         # use unsqueeze() to get a 4-D input for convolution layers. (batch_size * 1 * max_length * embedding_size)
         item_seq_emb = item_seq_emb.unsqueeze(1)
@@ -145,6 +149,8 @@ class CaserAttr(Caser):
         out = self.dropout(out)
         # fully-connected layer
         z = self.ac_fc(self.fc1(out))
+        if self.user_fusion == "post_merge":
+            user_emb = merge_user_embeddings(self.user_attributes, embedded_user_features, state=user_emb)
         x = torch.cat([z, user_emb], 1)
         seq_output = self.ac_fc(self.fc2(x))
         # the hidden_state of the predicted item, size: (batch_size * hidden_size)

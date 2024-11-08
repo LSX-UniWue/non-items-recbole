@@ -9,7 +9,7 @@
 model: GRU4RecAttr
 embedding_size: 4
 dropout_prob: 0.3
-hidden_size: 6
+hidden_size: 4
 num_layers: 2
 loss_type: 'CE'
 
@@ -39,6 +39,7 @@ items:
       embedding_type: 'multihot' #multi-hot encoding
 
 users:
+  user_fusion: "post_merge"
   attribute_fusion: 'sum' #fusion function for attributes
   attributes: #list all attributes with their embeddings
     genres: #name of the attribute
