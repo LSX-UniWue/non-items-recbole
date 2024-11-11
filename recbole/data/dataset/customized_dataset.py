@@ -417,3 +417,13 @@ class NextItNetAttrDataset(BenchAttrSequentialDataset):
 class BERT4RecAttrDataset(BenchAttrSequentialDataset):
     def __init__(self, config):
         super().__init__(config)
+
+class STAMPAttrDataset(BenchAttrSequentialDataset):
+    def __init__(self, config):
+        super().__init__(config)
+
+class DIFSRAttrDataset(BenchAttrSequentialDataset):
+    def __init__(self, config):
+        super().__init__(config)
+
+

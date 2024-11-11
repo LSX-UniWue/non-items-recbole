@@ -6,3 +6,4 @@ from recbole.model.sequential_attribute_recommender.coreattr import COREAttr
 from recbole.model.sequential_attribute_recommender.lightsansattr import LightSANsAttr
 from recbole.model.sequential_attribute_recommender.nextitnetattr import NextItNetAttr
 from recbole.model.sequential_attribute_recommender.bert4recattr import BERT4RecAttr
+from recbole.model.sequential_attribute_recommender.difsrattr import DIFSRAttr
