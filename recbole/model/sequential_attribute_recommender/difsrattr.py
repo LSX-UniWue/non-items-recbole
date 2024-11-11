@@ -15,11 +15,9 @@ import torch
 from torch import nn
 
 from recbole.model.abstract_recommender import SequentialRecommender
-from recbole.model.layers import FeatureSeqEmbLayer
 from recbole.model.loss import BPRLoss
-import copy
 
-from recbole.model.dif_layers import DIFTransformerEncoder
+from recbole.model.sequential_attribute_recommender.difsattr_layers import DIFTransformerEncoder
 from recbole.model.sequential_attribute_recommender.content_layers import create_attribute_embeddings, embed_attributes, \
     create_mask_or_pad_dict, concat_user_embeddings, merge_user_embeddings
 
