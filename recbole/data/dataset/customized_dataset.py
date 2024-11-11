@@ -422,6 +422,14 @@ class STAMPAttrDataset(BenchAttrSequentialDataset):
     def __init__(self, config):
         super().__init__(config)
 
+class BERT4RecNOVADataset(BenchAttrSequentialDataset):
+    def __init__(self, config):
+        super().__init__(config)
+
+class SASRecNOVADataset(BenchAttrSequentialDataset):
+    def __init__(self, config):
+        super().__init__(config)
+
 class DIFSRAttrDataset(BenchAttrSequentialDataset):
     def __init__(self, config):
         super().__init__(config)
