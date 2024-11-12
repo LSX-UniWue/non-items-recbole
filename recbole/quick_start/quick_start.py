@@ -145,9 +145,14 @@ def run_recbole(
     trainer = get_trainer(config["MODEL_TYPE"], config["model"])(config, model)
 
     # model training
-    best_valid_score, best_valid_result = trainer.fit(
-        train_data, valid_data, saved=saved, show_progress=config["show_progress"]
-    )
+    if config["test_all_epochs"] == True:
+        best_valid_score, best_valid_result = trainer.fit(
+            train_data, valid_data, test_data, saved=saved, show_progress=config["show_progress"]
+        )
+    else:
+        best_valid_score, best_valid_result = trainer.fit(
+            train_data, valid_data, saved=saved, show_progress=config["show_progress"]
+        )
 
     # model evaluation
     test_result = trainer.evaluate(

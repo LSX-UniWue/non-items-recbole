@@ -406,6 +406,7 @@ class Trainer(AbstractTrainer):
         self,
         train_data,
         valid_data=None,
+        test_data=None,
         verbose=True,
         saved=True,
         show_progress=False,
@@ -454,6 +455,11 @@ class Trainer(AbstractTrainer):
                 {"epoch": epoch_idx, "train_loss": train_loss, "train_step": epoch_idx},
                 head="train",
             )
+
+            #Eval each epoch
+            if test_data is not None:
+                test_result = self.evaluate(test_data, load_best_model=False, show_progress=show_progress)
+                self.wandblogger.log_metrics({**test_result, "test_step": epoch_idx}, head="ep_test")
 
             # eval
             if self.eval_step <= 0 or not valid_data:
