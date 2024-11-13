@@ -57,6 +57,7 @@ class WandbLogger(object):
     def _set_steps(self):
         self._wandb.define_metric("train/*", step_metric="train_step")
         self._wandb.define_metric("valid/*", step_metric="valid_step")
+        self._wandb.define_metric("seq_len/*", step_metric="seq_len_step")
 
     def _add_head_to_metrics(self, metrics, head):
         head_metrics = dict()

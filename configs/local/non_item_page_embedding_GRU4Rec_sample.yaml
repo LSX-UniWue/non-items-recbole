@@ -7,9 +7,9 @@
 
 # Model
 model: GRU4RecAttr
-embedding_size: 4
+embedding_size: 16
 dropout_prob: 0.3
-hidden_size: 4
+hidden_size: 16
 num_layers: 2
 loss_type: 'CE'
 
@@ -18,7 +18,7 @@ seed: 212
 state: DEBUG  #INFO
 reproducibility: True
 data_path: '/Users/lisa/RecBole/dataset/'
-checkpoint_dir: 'saved'
+checkpoint_dir: 'Users/lisa/RecBole/saved/'
 show_progress: True
 save_dataset: False
 save_dataloaders: False
@@ -26,7 +26,7 @@ save_dataloaders: False
 # Data Augmentation
 subsequences_end_with_items: True
 train_subsequences: False
-#test_subsequences: True
+test_subsequences: True
 
 # Item Attributes
 items:
@@ -72,26 +72,28 @@ item_inter_num_interval: "[5,inf)"
 #log_wandb: True
 
 # training settings
-epochs: 1
+epochs: 8
 train_batch_size: 2
 
 learner: adam
 learning_rate: 0.001
-eval_step: 2
+eval_step: 4
 stopping_step: 10
 clip_grad_norm: ~
 weight_decay: 0.0
 
-benchmark_filename: ["test","validation","train"] #In combination with BenchAttrSequentialDataset this
+benchmark_filename: ["train","validation","test"] #In combination with BenchAttrSequentialDataset this
                                                   #loads files in the normal .inter format
 
 # evaluation settings
 eval_args:
   #split: {'RS': [0.8,0.1,0.1]}
-  item_id: item_id_type
+  #item_id: item_id_type
   group_by: user
   order: TO
   mode: full
+  eval_sequence_len: True
+  max_sequence_len: 20
 
 repeatable: True
 metrics: ["Recall","NDCG","MRR"]
@@ -103,8 +105,14 @@ valid_batch_size: 2
 loss_decimal_place: 4
 metric_decimal_place: 4
 train_neg_sample_args: null
-MAX_ITEM_LIST_LENGTH: 10
+MAX_ITEM_LIST_LENGTH: 200
 USER_ID_FIELD: userId
 RATING_FIELD: rating
 TIME_FIELD: timestamp
-ITEM_ID_FIELD: title #title contains only a dummy id for non-items, therefore the attributes represent the content
+ITEM_ID_FIELD: title
+
+test_all_epochs: False
+log_wandb: True
+wandb_project: 'recbole'
+wandb_name: "log_epochs"
+#wandb_entity:

@@ -456,9 +456,9 @@ class Trainer(AbstractTrainer):
                 head="train",
             )
 
-            #Eval each epoch
+            # Eval each epoch
             if test_data is not None:
-                test_result = self.evaluate(test_data, load_best_model=False, show_progress=show_progress)
+                test_result = self.evaluate(test_data, load_best_model=False, show_progress=show_progress, is_test_stage=True)
                 self.wandblogger.log_metrics({**test_result, "test_step": epoch_idx}, head="ep_test")
 
             # eval
@@ -574,7 +574,8 @@ class Trainer(AbstractTrainer):
 
     @torch.no_grad()
     def evaluate(
-        self, eval_data, load_best_model=True, model_file=None, show_progress=False, write_predictions=None
+            self, eval_data, load_best_model=True, model_file=None, show_progress=False, write_predictions=None,
+            is_test_stage=False
     ):
         r"""Evaluate the model based on the eval data.
 
@@ -638,11 +639,21 @@ class Trainer(AbstractTrainer):
 
         self.eval_collector.model_collect(self.model)
         struct = self.eval_collector.get_data_struct()
+
+        if is_test_stage == True and self.config["eval_args"]["eval_sequence_len"] == True:
+            self.logger.info("Evaluating per sequence length")
+
+            lengths_dicts = self.evaluator.evaluate_sequence_lengths(struct, range(0, self.config["eval_args"]["max_sequence_len"]))
+            if not self.config["single_spec"]:
+                for key, value in lengths_dicts.items():
+                    lengths_dicts[key] = self._map_reduce(value, num_sample)
+            for key, value in lengths_dicts.items():
+                self.wandblogger.log_metrics({**value, "seq_len_step": key}, head="seq_len")
+
         result = self.evaluator.evaluate(struct)
         if not self.config["single_spec"]:
             result = self._map_reduce(result, num_sample)
         self.wandblogger.log_eval_metrics(result, head="eval")
-
         return result
 
     def eval_all_batches(self, eval_func, iter_data, num_sample, show_progress, eval_data, output_file=None):
