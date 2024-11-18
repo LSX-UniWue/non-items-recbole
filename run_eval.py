@@ -57,7 +57,7 @@ def run_recbole(
 
     # model evaluation
     test_result = trainer.evaluate(
-        test_data, load_best_model=False, show_progress=config["show_progress"], write_predictions=write_predictions, is_test_stage= True
+        test_data, load_best_model=False, show_progress=config["show_progress"], write_predictions=write_predictions, is_final_test_stage= True
     )
 
     logger.info(test_result)

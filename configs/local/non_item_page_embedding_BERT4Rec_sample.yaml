@@ -30,7 +30,7 @@ save_dataloaders: False
 
 # Data Augmentation
 subsequences_end_with_items: True
-train_subsequences: False
+train_subsequences: True
 #test_subsequences: True
 
 # Item Attributes

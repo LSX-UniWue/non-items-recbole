@@ -458,7 +458,7 @@ class Trainer(AbstractTrainer):
 
             # Eval each epoch
             if test_data is not None:
-                test_result = self.evaluate(test_data, load_best_model=False, show_progress=show_progress, is_test_stage=True)
+                test_result = self.evaluate(test_data, load_best_model=False, show_progress=show_progress)
                 self.wandblogger.log_metrics({**test_result, "test_step": epoch_idx}, head="ep_test")
 
             # eval
@@ -575,7 +575,7 @@ class Trainer(AbstractTrainer):
     @torch.no_grad()
     def evaluate(
             self, eval_data, load_best_model=True, model_file=None, show_progress=False, write_predictions=None,
-            is_test_stage=False
+            is_final_test_stage=False
     ):
         r"""Evaluate the model based on the eval data.
 
@@ -640,7 +640,7 @@ class Trainer(AbstractTrainer):
         self.eval_collector.model_collect(self.model)
         struct = self.eval_collector.get_data_struct()
 
-        if is_test_stage == True and self.config["eval_args"]["eval_sequence_len"] == True:
+        if is_final_test_stage == True and self.config["eval_args"]["eval_sequence_len"] == True:
             self.logger.info("Evaluating per sequence length")
 
             lengths_dicts = self.evaluator.evaluate_sequence_lengths(struct, range(0, self.config["eval_args"]["max_sequence_len"]))

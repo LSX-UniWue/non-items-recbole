@@ -94,6 +94,7 @@ eval_args:
   mode: full
   eval_sequence_len: True
   max_sequence_len: 20
+test_all_epochs: True
 
 repeatable: True
 metrics: ["Recall","NDCG","MRR"]
@@ -111,7 +112,6 @@ RATING_FIELD: rating
 TIME_FIELD: timestamp
 ITEM_ID_FIELD: title
 
-test_all_epochs: False
 log_wandb: True
 wandb_project: 'recbole'
 wandb_name: "log_epochs"
