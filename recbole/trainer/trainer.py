@@ -24,8 +24,10 @@ from logging import getLogger
 from time import time
 
 import numpy as np
+import pandas as pd
 import torch
 import torch.optim as optim
+import wandb
 from torch.nn.utils.clip_grad import clip_grad_norm_
 from tqdm import tqdm
 import torch.cuda.amp as amp
@@ -640,15 +642,38 @@ class Trainer(AbstractTrainer):
         self.eval_collector.model_collect(self.model)
         struct = self.eval_collector.get_data_struct()
 
-        if is_final_test_stage == True and self.config["eval_args"]["eval_sequence_len"] == True:
-            self.logger.info("Evaluating per sequence length")
-
-            lengths_dicts = self.evaluator.evaluate_sequence_lengths(struct, range(0, self.config["eval_args"]["max_sequence_len"]))
-            if not self.config["single_spec"]:
+        if is_final_test_stage == True:
+            if self.config["eval_args"]["eval_sequence_len"] == True:
+                self.logger.info("Evaluating per sequence length")
+                lengths_dicts, lengths_counts = self.evaluator.evaluate_sequence_lengths(struct, range(0, self.config["eval_args"]["max_sequence_len"]))
+                metrics_data = []
+                if not self.config["single_spec"]:
+                    for key, value in lengths_dicts.items():
+                        lengths_dicts[key] = self._map_reduce(value, num_sample)
                 for key, value in lengths_dicts.items():
-                    lengths_dicts[key] = self._map_reduce(value, num_sample)
-            for key, value in lengths_dicts.items():
-                self.wandblogger.log_metrics({**value, "seq_len_step": key}, head="seq_len")
+                    self.wandblogger.log_metrics({**value, "seq_len_step": key}, head="seq_len")
+                    entry = {"seq_len": key, "count": lengths_counts.get(key, 0)}
+                    entry.update(value)  # Add all metrics
+                    metrics_data.append(entry)
+                df = pd.DataFrame(metrics_data)
+                df_sorted = df.sort_values(by="seq_len", ascending=True)
+                self.wandblogger._wandb.log({"seq_len_metrics": wandb.Table(dataframe=df_sorted)})
+
+            if self.config["eval_args"]["eval_per_item"] == True:
+                per_item_dicts, item_counts = self.evaluator.evaluate_per_item(struct, range(0, eval_data._dataset.item_num))
+                metrics_data = []
+                if not self.config["single_spec"]:
+                    for key, value in per_item_dicts.items():
+                        per_item_dicts[key] = self._map_reduce(value, num_sample)
+                for key, value in per_item_dicts.items():
+                    self.wandblogger.log_metrics({**value, "per_item_id": key}, head="per_item_metrics")
+                    entry = {"ItemId": key, "count": item_counts.get(key, 0)}
+                    entry.update(value)  # Add all metrics
+                    metrics_data.append(entry)
+                df = pd.DataFrame(metrics_data)
+                df_sorted = df.sort_values(by="count", ascending=False)
+                self.wandblogger._wandb.log({"item_counts_metrics": wandb.Table(dataframe=df_sorted)})
+
 
         result = self.evaluator.evaluate(struct)
         if not self.config["single_spec"]:
@@ -678,7 +703,6 @@ class Trainer(AbstractTrainer):
                     recos = str(list(id2token_dict[itemid_name][top5_indices]))
 
                 output_file.write(f"{userid}\t{recos}\n")
-
         return num_sample
 
     def _map_reduce(self, result, num_sample):

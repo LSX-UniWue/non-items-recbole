@@ -168,6 +168,7 @@ class Collector(object):
             result = torch.cat((pos_idx, pos_len_list), dim=1)
             self.data_struct.update_tensor("rec.topk", result)
             self.data_struct.update_tensor("rec.seq_len", interaction["item_length"])
+            self.data_struct.update_tensor("rec.pos_item", positive_i)
 
         if self.register.need("rec.meanrank"):
 
@@ -227,7 +228,7 @@ class Collector(object):
         for key in self.data_struct._data_dict:
             self.data_struct._data_dict[key] = self.data_struct._data_dict[key].cpu()
         returned_struct = copy.deepcopy(self.data_struct)
-        for key in ["rec.topk","rec.seq_len","rec.meanrank", "rec.score", "rec.items", "data.label"]:
+        for key in ["rec.topk","rec.seq_len","rec.pos_item","rec.meanrank", "rec.score", "rec.items", "data.label"]:
             if key in self.data_struct:
                 del self.data_struct[key]
         return returned_struct
