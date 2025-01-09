@@ -30,7 +30,7 @@ from recbole.model.abstract_recommender import SequentialRecommender
 from recbole.model.loss import BPRLoss
 from recbole.model.sequential_attribute_recommender.content_layers import create_attribute_embeddings, \
     embed_attributes, merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict, \
-    merge_user_embeddings
+    merge_user_embeddings, embed_user_attributes, merge_user_attributes
 
 
 class GRU4RecAttr(SequentialRecommender):
@@ -95,10 +95,13 @@ class GRU4RecAttr(SequentialRecommender):
         embedded_features = embed_attributes(interaction, self.item_attributes, self.attribute_embeddings,
                                              use_masked_sequence=False, pad_values=self.pad_dict)
         item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb)
-        embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
+        embedded_user_features = embed_user_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
 
         if self.user_fusion == "concat":
             item_seq_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_seq_emb)
+        #if self.user_fusion == "only_user":
+        #    item_seq_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_seq_emb)
+        #    item_seq_len = torch.ones(item_seq_len.size(), dtype=item_seq_len.dtype, device=item_seq_len.device)
 
         item_seq_emb_dropout = self.emb_dropout(item_seq_emb)
         gru_output, _ = self.gru_layers(item_seq_emb_dropout)

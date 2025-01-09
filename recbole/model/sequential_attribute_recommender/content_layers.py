@@ -68,26 +68,47 @@ def create_attribute_embeddings(field2token_id, attributes, hidden_size, masking
                     attribute_embeddings[attribute_name] = VectorNormNScale(size,hidden_size)
     return nn.ModuleDict(attribute_embeddings)
 
+def embed_user_attributes(interaction, attributes_config, attribute_embeddings):
+    embedded_features = {}
+    if attributes_config is not None and attributes_config.get("attributes") is not None:
+        for feature in attributes_config.get("attributes"):
+            embedded_features[feature] = embed_feature(attribute_embeddings, attributes_config, feature, interaction,
+                                                       source_default="user")
+            embedded_features[feature] = embedded_features[feature][:, 0:1, :]
+    return embedded_features
+
 def embed_attributes(interaction, attributes_config, attribute_embeddings, use_masked_sequence=False, pad_values={}):
-    # embed the attribute embeddings
+    # embed the attributes
     embedded_features = {}
     if attributes_config is not None and attributes_config.get("attributes") is not None:
         skip_item = attributes_config.get("attributes_listpage_only", False)
         for feature in attributes_config.get("attributes"):
-            if use_masked_sequence:
-                additional_metadata = interaction["mask_"+feature + "_list"]
-            else:
-                additional_metadata = interaction[feature + "_list"]
-            if skip_item: #only use attributes to represent non items
-                if use_masked_sequence:
-                    item_id_type = interaction["mask_" + attributes_config["item_id_type_settings"]["name"] + "_list"]
-                else:
-                    item_id_type = interaction[attributes_config["item_id_type_settings"]["name"] + "_list"]
-                additional_metadata[item_id_type == 1] = torch.tensor(pad_values[feature], device=additional_metadata.device).type(additional_metadata.dtype)
-            if attributes_config["attributes"][feature]["embedding_type"] == "float":
-                additional_metadata = torch.unsqueeze(additional_metadata, 2)
-            embedded_features[feature] = attribute_embeddings[feature](additional_metadata)
+            embedded_features[feature] = embed_feature(attribute_embeddings, attributes_config, feature, interaction,
+                                                       pad_values, skip_item, use_masked_sequence, "inter")
     return embedded_features
+
+
+def embed_feature(attribute_embeddings, attributes_config, feature, interaction, pad_values={},
+                  skip_item=False, use_masked_sequence=False, source_default="inter"):
+    source = attributes_config["attributes"][feature].get("source", source_default)
+    if use_masked_sequence:
+        additional_metadata = interaction["mask_" + feature + "_list"]
+    elif source == "inter":
+        additional_metadata = interaction[feature + "_list"]
+    elif source == "user":
+        additional_metadata = torch.unsqueeze(interaction[feature], -1)
+
+    if skip_item:  # only use attributes to represent non items
+        if use_masked_sequence:
+            item_id_type = interaction["mask_" + attributes_config["item_id_type_settings"]["name"] + "_list"]
+        else:
+            item_id_type = interaction[attributes_config["item_id_type_settings"]["name"] + "_list"]
+        additional_metadata[item_id_type == 1] = torch.tensor(pad_values[feature],
+                                                              device=additional_metadata.device).type(
+            additional_metadata.dtype)
+    if attributes_config["attributes"][feature]["embedding_type"] == "float":
+        additional_metadata = torch.unsqueeze(additional_metadata, 2)
+    return attribute_embeddings[feature](additional_metadata)
 
 
 def merge_embedded_item_features(embedded_features, attributes_config, item_seq_emb):
@@ -101,18 +122,21 @@ def merge_embedded_item_features(embedded_features, attributes_config, item_seq_
                 item_seq_emb = item_seq_emb * embedded_features[feature]
     return item_seq_emb
 
-
-def concat_user_embeddings(user_attributes, embedded_user_features, item_seq_emb):
+def merge_user_attributes(user_attributes, embedded_user_features):
     if user_attributes is not None:
         merge = user_attributes.get("attribute_fusion", None)
         user_embedding_list = list(embedded_user_features.values())
-        user_embedding = user_embedding_list[0][:, 0:1, :]  # get the first user embedding
+        user_embedding = user_embedding_list[0] # get the first user embedding
         for i in range(1, len(user_embedding_list)):
             if merge == "sum":
-                user_embedding = user_embedding + user_embedding_list[i][:, 0:1, :]
+                user_embedding = user_embedding + user_embedding_list[i]
             if merge == "multiply":
-                user_embedding = user_embedding * user_embedding_list[i][:, 0:1, :]
-            item_seq_emb = torch.concat((user_embedding, item_seq_emb), dim=1)
+                user_embedding = user_embedding * user_embedding_list[i]
+        return user_embedding
+def concat_user_embeddings(user_attributes, embedded_user_features, item_seq_emb):
+    if user_attributes is not None:
+        user_embedding = merge_user_attributes(user_attributes, embedded_user_features)
+        item_seq_emb = torch.concat((user_embedding, item_seq_emb), dim=1)
     return item_seq_emb
 
 def merge_user_embeddings(user_attributes, embedded_user_features, sequence = None, state = None):

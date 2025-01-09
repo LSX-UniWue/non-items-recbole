@@ -34,7 +34,7 @@ from recbole.model.abstract_recommender import SequentialRecommender
 from recbole.model.layers import TransformerEncoder
 from recbole.model.sequential_attribute_recommender.content_layers import create_attribute_embeddings, \
     embed_attributes, merge_embedded_item_features, create_mask_or_pad_dict, concat_user_embeddings, \
-    merge_user_embeddings
+    merge_user_embeddings, embed_user_attributes, merge_user_attributes
 
 
 class BERT4RecAttr(SequentialRecommender):
@@ -195,18 +195,25 @@ class BERT4RecAttr(SequentialRecommender):
         embedded_features = embed_attributes(interaction, self.item_attributes, self.attribute_embeddings,
                                              use_masked_sequence=self.use_masked_features, pad_values=self.pad_dict)
         item_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_emb)
-        embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
+        embedded_user_features = embed_user_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
+        mask_seq = item_seq
 
         if self.user_fusion == "concat":
             item_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_emb)
-            user_mask = torch.zeros((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
-            item_seq = torch.concat((user_mask, item_seq), dim=1)
+            user_mask = torch.ones((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
+            mask_seq = torch.concat((user_mask, item_seq), dim=1)
+
+        #if self.user_fusion == "only_user":
+        #    item_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_emb)
+         #   user_mask = torch.ones((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
+         #   seq_mask = torch.zeros((item_seq.size(0), item_seq.size(1)), device=item_seq.device, dtype=item_seq.dtype)
+         #   mask_seq = torch.concat((user_mask, seq_mask), dim=1)
 
         input_emb = item_emb + position_embedding
         input_emb = self.LayerNorm(input_emb)
         input_emb = self.dropout(input_emb)
 
-        extended_attention_mask = self.get_attention_mask(item_seq, bidirectional=True)
+        extended_attention_mask = self.get_attention_mask(mask_seq, bidirectional=True)
         trm_output = self.trm_encoder(
             input_emb, extended_attention_mask, output_all_encoded_layers=True)[-1]
 
@@ -218,6 +225,8 @@ class BERT4RecAttr(SequentialRecommender):
         output = self.output_ln(ffn_output)
         if self.user_fusion == "concat":
             return output[:, 1:, :]
+        #if self.user_fusion == "only_user":
+        #    return output[:, 0:1, :]
         return output  # [B L H]
 
 

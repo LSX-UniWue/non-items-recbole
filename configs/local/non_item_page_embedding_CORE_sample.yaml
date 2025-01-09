@@ -42,13 +42,17 @@ items:
       embedding_type: 'multihot' #multi-hot encoding
 
 users:
-  user_fusion: "post_merge"
+  user_fusion: "only_user"
   attribute_fusion: 'sum' #fusion function for attributes
   attributes: #list all attributes with their embeddings
+    #age: #name of the attribute
+    # embedding_type: 'multihot' #multi-hot encoding
+    gender: #name of the attribute
+      embedding_type: 'std_embedding'
+      source: 'user'
     genres: #name of the attribute
       embedding_type: 'multihot' #multi-hot encoding
-    item_id_type: #name of the attribute
-      embedding_type: 'float'
+      source: 'inter'
 
 # dataset
 load_col:
@@ -62,6 +66,10 @@ load_col:
   item: #item attributes: item_id_type needed to evaluate on items only - add the ITEM_ID_FIELD
     - title
     - item_id_type
+  user:
+    - userId
+    - age
+    - gender
 seq_separator: '|'
 seq_len: #for sequencial features: List max len
   genres: 6

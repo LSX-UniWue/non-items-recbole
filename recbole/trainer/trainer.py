@@ -643,7 +643,7 @@ class Trainer(AbstractTrainer):
         struct = self.eval_collector.get_data_struct()
 
         if is_final_test_stage == True:
-            if self.config["eval_args"]["eval_sequence_len"] == True:
+            if self.config["eval_args"].get("eval_sequence_len", False) == True:
                 self.logger.info("Evaluating per sequence length")
                 lengths_dicts, lengths_counts = self.evaluator.evaluate_sequence_lengths(struct, range(0, self.config["eval_args"]["max_sequence_len"]))
                 metrics_data = []
@@ -659,7 +659,7 @@ class Trainer(AbstractTrainer):
                 df_sorted = df.sort_values(by="seq_len", ascending=True)
                 self.wandblogger._wandb.log({"seq_len_metrics": wandb.Table(dataframe=df_sorted)})
 
-            if self.config["eval_args"]["eval_per_item"] == True:
+            if self.config["eval_args"].get("eval_per_item", False):
                 per_item_dicts, item_counts = self.evaluator.evaluate_per_item(struct, range(0, eval_data._dataset.item_num))
                 metrics_data = []
                 if not self.config["single_spec"]:
