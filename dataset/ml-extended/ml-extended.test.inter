@@ -1,4 +1,6 @@
 timestamp:float	item_id_type:float	userId:token	title:token	title_genres:token	genres:token_seq
+1094785598	0	1234	n1	n2	n3
+1094785598	1	1234	2001: A Space Odyssey (1968)	2001: A Space Odyssey (1968)	Adventure|Drama|Sci-Fi
 1094785598	0	1	OVERVIEW-PAGE	Adventure|Drama|Sci-Fi	Adventure|Drama|Sci-Fi
 1094785598	1	1	2001: A Space Odyssey (1968)	2001: A Space Odyssey (1968)	Adventure|Drama|Sci-Fi
 1094785621	0	1	OVERVIEW-PAGE	Adventure|Children|Fantasy|Musical	Adventure|Children|Fantasy|Musical

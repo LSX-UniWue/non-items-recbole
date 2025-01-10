@@ -210,11 +210,23 @@ class BenchAttrSequentialDataset(SequentialDataset):
             list: List of built :class:`Dataset`.
         """
         datasets = None
-        self._change_feat_format()
-        if self.benchmark_filename_list is not None:
-            self._drop_unused_col()
-            cumsum = list(np.cumsum(self.file_size_list))
-            datasets = [self.copy(self.inter_feat[start:end]) for start, end in zip([0] + cumsum[:-1], cumsum)]
+        if self.config._get_final_config_dict().get("only_train_tokens", True):
+            datasets = [self.copy(self.inter_feat[stage]) for stage in self.benchmark_filename_list]
+
+            for dataset in datasets:
+                dataset._user_item_feat_preparation() # ok, fix once user/item files are split
+                dataset._fill_nan()
+                dataset._set_label_by_threshold()
+                dataset._normalize()
+                dataset._discretization()
+                dataset._preload_weight_matrix()
+                dataset._change_feat_format()
+        else:
+            self._change_feat_format()
+            if self.benchmark_filename_list is not None:
+                self._drop_unused_col()
+                cumsum = list(np.cumsum(self.file_size_list))
+                datasets = [self.copy(self.inter_feat[start:end]) for start, end in zip([0] + cumsum[:-1], cumsum)]
 
         # Augmentation only for Training
         self.masked_training = False if not hasattr(self.config, "masked_training") else self.config["masked_training"]

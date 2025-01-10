@@ -28,6 +28,8 @@ show_progress: True
 save_dataset: False
 save_dataloaders: False
 
+#only_train_tokens: False
+
 # Data Augmentation
 subsequences_end_with_items: True
 #train_subsequences: True
@@ -46,7 +48,7 @@ items:
       len: 6
 
 users:
-  user_fusion: "concat"
+  #user_fusion: "concat"
   attribute_fusion: 'sum' #fusion function for attributes
   attributes: #list all attributes with their embeddings
     #age: #name of the attribute
@@ -97,7 +99,7 @@ stopping_step: 10
 clip_grad_norm: ~
 weight_decay: 0.0
 
-benchmark_filename: ["test","validation","train"]
+benchmark_filename: ["train","validation","test"]
 
 # evaluation settings
 eval_args:

@@ -127,10 +127,12 @@ def run_recbole(
 
     # dataset filtering
     dataset = create_dataset(config)
-    logger.info(dataset)
 
     # dataset splitting
     train_data, valid_data, test_data = data_preparation(config, dataset)
+    logger.info(train_data)
+    logger.info(valid_data)
+    logger.info(test_data)
 
     # model loading and initialization
     init_seed(config["seed"] + config["local_rank"], config["reproducibility"])
@@ -138,8 +140,8 @@ def run_recbole(
     logger.info(model)
 
     transform = construct_transform(config)
-    flops = get_flops(model, dataset, config["device"], logger, transform)
-    logger.info(set_color("FLOPs", "blue") + f": {flops}")
+    flops = get_flops(model, train_data._dataset, config["device"], logger, transform)
+    logger.info(set_color("TRAIN FLOPs", "blue") + f": {flops}")
 
     # trainer loading and initialization
     trainer = get_trainer(config["MODEL_TYPE"], config["model"])(config, model)
