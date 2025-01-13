@@ -97,19 +97,17 @@ class GRU4RecAttr(SequentialRecommender):
         item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb)
         embedded_user_features = embed_user_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
 
+        if self.user_fusion == "pre_merge":
+            item_seq_emb = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=item_seq_emb)
         if self.user_fusion == "concat":
             item_seq_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_seq_emb)
-        #if self.user_fusion == "only_user":
-        #    item_seq_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_seq_emb)
-        #    item_seq_len = torch.ones(item_seq_len.size(), dtype=item_seq_len.dtype, device=item_seq_len.device)
+            item_seq_len = item_seq_len + torch.ones_like(item_seq_len)
 
         item_seq_emb_dropout = self.emb_dropout(item_seq_emb)
         gru_output, _ = self.gru_layers(item_seq_emb_dropout)
         if self.user_fusion == "post_merge":
             gru_output = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=gru_output)
         gru_output = self.dense(gru_output)
-        if self.user_fusion == "concat":
-            gru_output = gru_output[:, 1:, :]
         # the embedding of the predicted item, shape of (batch_size, embedding_size)
         seq_output = self.gather_indexes(gru_output, item_seq_len - 1)
         return seq_output

@@ -237,17 +237,23 @@ class BenchAttrSequentialDataset(SequentialDataset):
         self.subsequences_end_with_items = False if not hasattr(self.config, "subsequences_end_with_items") else \
         self.config["subsequences_end_with_items"]
 
+        # For testing, we can create empty sequences to test the model's abilities to work only with user features
+        self.create_empty_sequences = False if not hasattr(self.config, "test_empty_sequences") else self.config[
+            "test_empty_sequences"]
+
         datasets[0].data_augmentation(subsequences=self.train_subsequences, masked_training=self.masked_training,
                                       subsequences_end_with_items=self.subsequences_end_with_items)
         datasets[1].data_augmentation(subsequences=self.test_subsequences,
-                                      subsequences_end_with_items=self.subsequences_end_with_items)
+                                      subsequences_end_with_items=self.subsequences_end_with_items,
+                                      create_empty_sequences=self.create_empty_sequences)
         datasets[2].data_augmentation(subsequences=self.test_subsequences,
-                                      subsequences_end_with_items=self.subsequences_end_with_items)
+                                      subsequences_end_with_items=self.subsequences_end_with_items,
+                                      create_empty_sequences=self.create_empty_sequences)
 
         self.inter_feat = datasets[0].inter_feat  # So there's something the calculate the flops for logging
         return datasets
 
-    def data_augmentation(self, subsequences=False, masked_training=False, subsequences_end_with_items=False):
+    def data_augmentation(self, subsequences=False, masked_training=False, subsequences_end_with_items=False, create_empty_sequences=False):
         """Augmentation processing for sequential dataset, with the option to generate subsequences.
 
         Sequence ``<i1, i2, i3, i4>`` will be split into subsequences of the form:
@@ -255,7 +261,7 @@ class BenchAttrSequentialDataset(SequentialDataset):
 
         For masked training, the  ``<i1, i2, i3, i4>`` will be split as follows, with a dummy target that is not used:
         ``<i1, i2> | i2 ``, ``<i1, i2, i3> | i3``, ``<i1, i2, i3, i4> | i4``
-        This allows all models to see the same target items while training.
+        This allows all models to see the same items while training.
 
         """
         if masked_training:
@@ -326,7 +332,10 @@ class BenchAttrSequentialDataset(SequentialDataset):
         new_length = len(item_list_index)
 
         new_data = self.inter_feat[target_index]
-        new_dict = {self.item_list_length_field: torch.tensor(item_list_length), }
+        if create_empty_sequences:
+            new_dict = {self.item_list_length_field: torch.tensor(item_list_length).fill_(0), }
+        else:
+            new_dict = {self.item_list_length_field: torch.tensor(item_list_length), }
 
         for field in self.inter_feat:
             if field != self.uid_field:
@@ -339,10 +348,13 @@ class BenchAttrSequentialDataset(SequentialDataset):
                 new_dict[list_field] = torch.zeros(shape, dtype=self.inter_feat[field].dtype)
 
                 value = self.inter_feat[field]
-                for i, (index, length) in enumerate(zip(item_list_index, item_list_length)):
-                    new_dict[list_field][i][:length] = value[index]
-        new_data.update(Interaction(new_dict))
+                if create_empty_sequences:
+                    pass
+                else:
+                    for i, (index, length) in enumerate(zip(item_list_index, item_list_length)):
+                        new_dict[list_field][i][:length] = value[index]
 
+        new_data.update(Interaction(new_dict))
         self.inter_feat = new_data
 
     def create_subsequences(self, item_id_type_feature, item_list_index, item_list_length, last_uid, masked_training,

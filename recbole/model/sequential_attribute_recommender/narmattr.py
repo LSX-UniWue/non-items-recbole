@@ -33,7 +33,7 @@ from recbole.model.abstract_recommender import SequentialRecommender
 from recbole.model.loss import BPRLoss
 from recbole.model.sequential_attribute_recommender.content_layers import create_attribute_embeddings, \
     embed_attributes, merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict, \
-    merge_user_embeddings
+    merge_user_embeddings, embed_user_attributes
 from recbole.model.sequential_recommender import NARM
 
 
@@ -107,11 +107,15 @@ class NARMAttr(SequentialRecommender):
         embedded_features = embed_attributes(interaction, self.item_attributes, self.attribute_embeddings,
                                              use_masked_sequence=False, pad_values=self.pad_dict)
         item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb)
-        embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
+        embedded_user_features = embed_user_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
+
+        if self.user_fusion == "pre_merge":
+            item_seq_emb = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=item_seq_emb)
 
         if self.user_fusion == "concat":
             item_seq_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_seq_emb)
-            user_mask = torch.zeros((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
+            item_seq_len = item_seq_len + torch.ones_like(item_seq_len)
+            user_mask = torch.ones((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
             mask_seq = torch.concat((user_mask, item_seq), dim=1)
 
 
@@ -119,13 +123,11 @@ class NARMAttr(SequentialRecommender):
         gru_out, _ = self.gru(item_seq_emb_dropout)
         if self.user_fusion == "post_merge":
             gru_out = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=gru_out)
-        if self.user_fusion == "concat":
-            gru_out = gru_out[:, 1:, :]
 
         # fetch the last hidden state of last timestamp
         c_global = ht = self.gather_indexes(gru_out, item_seq_len - 1)
         # avoid the influence of padding
-        mask = item_seq.gt(0).unsqueeze(2).expand_as(gru_out)
+        mask = mask_seq.gt(0).unsqueeze(2).expand_as(gru_out)
         q1 = self.a_1(gru_out)
         q2 = self.a_2(ht)
         q2_expand = q2.unsqueeze(1).expand_as(q1)

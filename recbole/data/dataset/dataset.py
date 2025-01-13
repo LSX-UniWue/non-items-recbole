@@ -304,6 +304,7 @@ class Dataset(torch.utils.data.Dataset):
         else:
             sub_inter_lens = []
             sub_inter_feats = []
+            sub_field2seqlen = []
             overall_field2seqlen = defaultdict(int)
             self.inter_feat = {}
             for filename in self.benchmark_filename_list:
@@ -312,6 +313,7 @@ class Dataset(torch.utils.data.Dataset):
                     temp = self._load_feat(file_path, FeatureSource.INTERACTION)
                     sub_inter_feats.append(temp)
                     sub_inter_lens.append(len(temp))
+                    sub_field2seqlen.append(self.field2seqlen.copy())
                     for field in self.field2seqlen:
                         overall_field2seqlen[field] = max(
                             overall_field2seqlen[field], self.field2seqlen[field]
@@ -323,10 +325,11 @@ class Dataset(torch.utils.data.Dataset):
                 self.inter_feat[self.benchmark_filename_list[0]] = sub_inter_feats[0]
                 self.inter_feat[self.benchmark_filename_list[1]] = sub_inter_feats[1]
                 self.inter_feat[self.benchmark_filename_list[2]] = sub_inter_feats[2]
+                self.field2seqlen = sub_field2seqlen[0]
             else:
                 inter_feat = pd.concat(sub_inter_feats, ignore_index=True)
                 self.inter_feat, self.file_size_list = inter_feat, sub_inter_lens
-            self.field2seqlen = overall_field2seqlen
+                self.field2seqlen = overall_field2seqlen
 
     def _load_user_or_item_feat(self, token, dataset_path, source, field_name):
         """Load user/item features.

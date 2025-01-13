@@ -23,7 +23,8 @@ import torch
 from torch import nn
 
 from recbole.model.sequential_attribute_recommender.content_layers import create_attribute_embeddings, embed_attributes, \
-    merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict, merge_user_embeddings
+    merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict, merge_user_embeddings, \
+    embed_user_attributes
 from recbole.model.sequential_recommender import SASRec
 
 class SASRecAttr(SASRec):
@@ -66,25 +67,27 @@ class SASRecAttr(SASRec):
         embedded_features = embed_attributes(interaction, self.item_attributes, self.attribute_embeddings,
                                              use_masked_sequence=False, pad_values=self.pad_dict)
         item_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_emb)
-        embedded_user_features = embed_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
+        embedded_user_features = embed_user_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
+        mask_seq = item_seq
 
+        if self.user_fusion == "pre_merge":
+            item_emb = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=item_emb)
         if self.user_fusion == "concat":
             item_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_emb)
-            user_mask = torch.zeros((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
-            item_seq = torch.concat((user_mask, item_seq), dim=1)
+            user_mask = torch.ones((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
+            mask_seq = torch.concat((user_mask, item_seq), dim=1)
+            item_seq_len = item_seq_len + torch.ones_like(item_seq_len)
 
         input_emb = item_emb + position_embedding
         input_emb = self.LayerNorm(input_emb)
         input_emb = self.dropout(input_emb)
 
-        extended_attention_mask = self.get_attention_mask(item_seq)
+        extended_attention_mask = self.get_attention_mask(mask_seq)
         trm_output = self.trm_encoder(
             input_emb, extended_attention_mask, output_all_encoded_layers=True)[-1]
 
         if self.user_fusion == "post_merge":
             trm_output = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=trm_output)
-        if self.user_fusion == "concat":
-               trm_output = trm_output[:, 1:, :]
 
         output = self.gather_indexes(trm_output, item_seq_len - 1)
         return output  # [B H]

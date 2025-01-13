@@ -20,7 +20,8 @@ from recbole.utils import (
 def run_recbole(
     model_file,
     device='gpu',
-    write_predictions=None,):
+    write_predictions=None,
+    test_empty_sequences=False,):
     r"""A fast running api, which includes the complete process of
     training and testing a model on a specified dataset
 
@@ -38,14 +39,16 @@ def run_recbole(
     checkpoint = torch.load(model_file, map_location=torch.device(device))
     config = checkpoint["config"]
 
+    config["test_empty_sequences"] = test_empty_sequences
+
     init_seed(config["seed"], config["reproducibility"])
     init_logger(config)
     logger = getLogger()
     logger.info(config)
 
     dataset = create_dataset(config)
-    logger.info(dataset)
     train_data, valid_data, test_data = data_preparation(config, dataset)
+    logger.info(train_data)
 
     init_seed(config["seed"], config["reproducibility"])
     model = get_model(config["model"])(config, train_data._dataset).to(config["device"])
@@ -83,6 +86,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_file", "-m", type=str, default=None, help="saved model")
     parser.add_argument("--device", type=str, default='cuda', help="device")
     parser.add_argument("--write_predictions", default=None, help="path to pred file")
+    parser.add_argument("--test_empty_sequences", type=bool, default=False, help="test empty sequences")
     args, _ = parser.parse_known_args()
 
-    res = run_recbole(args.model_file, args.device, args.write_predictions)
+    res = run_recbole(args.model_file, args.device, args.write_predictions, args.test_empty_sequences)
