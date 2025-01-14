@@ -1183,7 +1183,11 @@ class Dataset(torch.utils.data.Dataset):
         for field in field_list:
             ftype = self.field2type[field]
             for feat in self.field2feats(field):
-                remap_list.append((feat, field, ftype))
+                if isinstance(feat, dict):
+                    for stage in self.benchmark_filename_list:
+                        remap_list.append((stage,feat[stage], field, ftype))
+                else:
+                    remap_list.append(("unsplit",feat, field, ftype))
         return remap_list
 
     def _remap_ID_all(self):
@@ -1193,6 +1197,7 @@ class Dataset(torch.utils.data.Dataset):
             self._remap(remap_list)
 
         for field in self._rest_fields:
+            print(field)
             remap_list = self._get_remap_list(np.array([field]))
             self._remap(remap_list)
 
@@ -1208,7 +1213,7 @@ class Dataset(torch.utils.data.Dataset):
             - split points that can be used to restore the concatenated tokens.
         """
         tokens = []
-        for feat, field, ftype in remap_list:
+        for name, feat, field, ftype in remap_list:
             if ftype == FeatureType.TOKEN:
                 tokens.append(feat[field].values)
             elif ftype == FeatureType.TOKEN_SEQ:
@@ -1226,19 +1231,24 @@ class Dataset(torch.utils.data.Dataset):
         if len(remap_list) == 0:
             return
         special_tokens = ["[PAD]"]
-        # Split Remap in train/test/val
+
         if self.config._get_final_config_dict().get("only_train_tokens", True):
-            remap_list_stages = self.get_stage_remap_lists(remap_list)
-            remap_list = remap_list_stages[0]
             special_tokens = ["[PAD]", "[UNK]"]
-        tokens, split_point = self._concat_remaped_tokens(remap_list)
+            remap_candidate_list = []
+            for remap_candidate in remap_list:
+                if remap_candidate[0] not in self.benchmark_filename_list[1:]:
+                    remap_candidate_list.append(remap_candidate)
+        else:
+            remap_candidate_list = remap_list
+
+        tokens, split_point = self._concat_remaped_tokens(remap_candidate_list)
         new_ids_list, mp = pd.factorize(tokens)
-        new_ids_list = np.split(new_ids_list + len(special_tokens), split_point)
+        new_ids_list = np.split(new_ids_list+len(special_tokens), split_point) #adjust ids for special tokens
         mp = np.array(special_tokens + list(mp))
         token_id = {t: i for i, t in enumerate(mp)}
 
         # Set all fields accordingly
-        for (feat, field, ftype), new_ids in zip(remap_list, new_ids_list):
+        for (name, feat, field, ftype), new_ids in zip(remap_candidate_list, new_ids_list):
             if field not in self.field2id_token:
                 self.field2id_token[field] = mp
                 self.field2token_id[field] = token_id
@@ -1250,24 +1260,29 @@ class Dataset(torch.utils.data.Dataset):
 
         # Now set val and test reusing the mappings, except for the user_id
         if self.config._get_final_config_dict().get("only_train_tokens", True):
-            for remap_list in remap_list_stages[1:]:
-                tokens, split_point = self._concat_remaped_tokens(remap_list)
-                remap_fields = [r[1] for r in remap_list]
+            remap_candidate_list = []
+            for remap_candidate in remap_list:
+                if remap_candidate[0] in self.benchmark_filename_list[1:]:
+                    remap_candidate_list.append(remap_candidate)
+            if len(remap_candidate_list) >0:
+                tokens, split_point = self._concat_remaped_tokens(remap_candidate_list)
+                remap_candidate_fields = [remap_candidate[2] for remap_candidate in remap_candidate_list]
                 mapped_tokens = []
-                if self.uid_field in remap_fields:
+                if self.uid_field in remap_candidate_fields:
                     # for new user ids, add them and update the mappings
                     for token in tokens:
-                        mapped_token = token_id.get(
-                            str(token))  # TODO cast to string, as .user already was change to int64
+                        mapped_token = token_id.get( str(token))  #cast to string, as .user already was change to int64
                         if mapped_token is None:
                             mapped_token = len(token_id) + 1  # Assign the next ID to new tokens
                             token_id[token] = mapped_token
                             mp = np.append(mp, token)
                         mapped_tokens.append(mapped_token)
                 else:
-                    mapped_tokens = [token_id.get(token, 1) for token in tokens]
+                    mapped_tokens = [token_id.get(str(token), 1) for token in tokens]
                 mapped_tokens = np.split(mapped_tokens, split_point)
-                for (feat, field, ftype), new_ids in zip(remap_list, mapped_tokens):
+
+
+                for (name, feat, field, ftype), new_ids in zip(remap_candidate_list, mapped_tokens):
                     if field == self.uid_field:
                         self.field2id_token[field] = mp
                         self.field2token_id[field] = token_id
@@ -1277,16 +1292,6 @@ class Dataset(torch.utils.data.Dataset):
                         split_point = np.cumsum(feat[field].agg(len))[:-1]
                         feat[field] = np.split(new_ids, split_point)
 
-    def get_stage_remap_lists(self, remap_list):
-        stages = []
-        for stage in self.benchmark_filename_list:
-            new_list = []
-            for feat, field, ftype in remap_list:
-                if isinstance(feat, dict):
-                    feat = feat[stage]
-                new_list.append((feat, field, ftype))
-            stages.append(new_list)
-        return stages
 
     def _change_feat_format(self):
         """Change feat format from :class:`pandas.DataFrame` to :class:`Interaction`."""
