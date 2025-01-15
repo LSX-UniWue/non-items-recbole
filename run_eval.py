@@ -21,7 +21,8 @@ def run_recbole(
     model_file,
     device='gpu',
     write_predictions=None,
-    test_empty_sequences=False,):
+    test_empty_sequences=False,
+    test_only_users_with_infos=False):
     r"""A fast running api, which includes the complete process of
     training and testing a model on a specified dataset
 
@@ -40,6 +41,7 @@ def run_recbole(
     config = checkpoint["config"]
 
     config["test_empty_sequences"] = test_empty_sequences
+    config["test_only_users_with_infos"] = test_only_users_with_infos
 
     init_seed(config["seed"], config["reproducibility"])
     init_logger(config)
@@ -87,6 +89,7 @@ if __name__ == "__main__":
     parser.add_argument("--device", type=str, default='cuda', help="device")
     parser.add_argument("--write_predictions", default=None, help="path to pred file")
     parser.add_argument("--test_empty_sequences", type=bool, default=False, help="test empty sequences")
+    parser.add_argument("--test_only_users_with_infos", type=bool, default=False, help="test_only_users_with_infos")
     args, _ = parser.parse_known_args()
 
-    res = run_recbole(args.model_file, args.device, args.write_predictions, args.test_empty_sequences)
+    res = run_recbole(args.model_file, args.device, args.write_predictions, args.test_empty_sequences, args.test_only_users_with_infos)

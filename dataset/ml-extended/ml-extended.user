@@ -14,7 +14,6 @@ userId:token	age:token	gender:token	occupation:token	zip_code:token
 13	47	M	educator	29206
 14	45	M	scientist	55106
 15	49	F	educator	97301
-16	21	M	entertainment	10309
 17	30	M	programmer	06355
 18	35	F	other	37212
 19	40	M	librarian	02138

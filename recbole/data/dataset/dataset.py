@@ -160,11 +160,6 @@ class Dataset(torch.utils.data.Dataset):
         self.feat_name_list = self._build_feat_name_list()
         if self.benchmark_filename_list is None:
             self._data_filtering()
-
-        if self.config._get_final_config_dict().get("only_train_tokens", True):
-            # All the tokens are only from the training set, except the user id, other processing moved to Custom Dataset
-            self._remap_ID_all()
-        else:
             self._remap_ID_all()
             self._user_item_feat_preparation()
             self._fill_nan()
@@ -172,6 +167,9 @@ class Dataset(torch.utils.data.Dataset):
             self._normalize()
             self._discretization()
             self._preload_weight_matrix()
+        else:
+            self._remap_ID_all()
+
 
     def _data_filtering(self):
         """Data filtering
@@ -320,15 +318,12 @@ class Dataset(torch.utils.data.Dataset):
                         )
                 else:
                     raise ValueError(f"File {file_path} not exist.")
-
-            if self.config._get_final_config_dict().get("only_train_tokens", True):
-                self.inter_feat[self.benchmark_filename_list[0]] = sub_inter_feats[0]
-                self.inter_feat[self.benchmark_filename_list[1]] = sub_inter_feats[1]
-                self.inter_feat[self.benchmark_filename_list[2]] = sub_inter_feats[2]
+            self.inter_feat[self.benchmark_filename_list[0]] = sub_inter_feats[0]
+            self.inter_feat[self.benchmark_filename_list[1]] = sub_inter_feats[1]
+            self.inter_feat[self.benchmark_filename_list[2]] = sub_inter_feats[2]
+            if self.config._get_final_config_dict().get("only_train_tokens", False):
                 self.field2seqlen = sub_field2seqlen[0]
             else:
-                inter_feat = pd.concat(sub_inter_feats, ignore_index=True)
-                self.inter_feat, self.file_size_list = inter_feat, sub_inter_lens
                 self.field2seqlen = overall_field2seqlen
 
     def _load_user_or_item_feat(self, token, dataset_path, source, field_name):
@@ -568,6 +563,17 @@ class Dataset(torch.utils.data.Dataset):
             self._rest_fields = np.setdiff1d(
                 self._rest_fields, alias, assume_unique=True
             )
+
+    def _filter_interaction_without_userinfo(self):
+        """Sort :attr:`user_feat` and :attr:`item_feat` by ``user_id`` or ``item_id``.
+        Missing values will be filled later.
+        """
+        if self.user_feat is not None:
+            available_uuids = self.user_feat[[self.uid_field]].drop_duplicates()
+            filtered_inters = self.inter_feat.merge(available_uuids, on=self.uid_field, how='inner')
+            self.inter_feat = filtered_inters
+            self.logger.debug(set_color("Removing User interaction without user file.", "green"))
+
 
     def _user_item_feat_preparation(self):
         """Sort :attr:`user_feat` and :attr:`item_feat` by ``user_id`` or ``item_id``.
@@ -1232,7 +1238,7 @@ class Dataset(torch.utils.data.Dataset):
             return
         special_tokens = ["[PAD]"]
 
-        if self.config._get_final_config_dict().get("only_train_tokens", True):
+        if self.config._get_final_config_dict().get("only_train_tokens", False):
             special_tokens = ["[PAD]", "[UNK]"]
             remap_candidate_list = []
             for remap_candidate in remap_list:
@@ -1259,7 +1265,7 @@ class Dataset(torch.utils.data.Dataset):
                 feat[field] = np.split(new_ids, split_point)
 
         # Now set val and test reusing the mappings, except for the user_id
-        if self.config._get_final_config_dict().get("only_train_tokens", True):
+        if self.config._get_final_config_dict().get("only_train_tokens", False):
             remap_candidate_list = []
             for remap_candidate in remap_list:
                 if remap_candidate[0] in self.benchmark_filename_list[1:]:

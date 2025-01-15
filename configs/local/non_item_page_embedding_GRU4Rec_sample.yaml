@@ -27,7 +27,8 @@ save_dataloaders: False
 #subsequences_end_with_items: True
 #train_subsequences: False
 #test_empty_sequences: True
-only_train_tokens: True
+#only_train_tokens: True
+test_only_users_with_infos: True
 
 # Item Attributes
 items:

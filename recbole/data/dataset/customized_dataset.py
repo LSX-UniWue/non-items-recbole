@@ -210,36 +210,36 @@ class BenchAttrSequentialDataset(SequentialDataset):
             list: List of built :class:`Dataset`.
         """
         datasets = None
-        if self.config._get_final_config_dict().get("only_train_tokens", True):
-            datasets = [self.copy(self.inter_feat[stage]) for stage in self.benchmark_filename_list]
 
-            for dataset in datasets:
-                dataset._user_item_feat_preparation() # ok, fix once user/item files are split
-                dataset._fill_nan()
-                dataset._set_label_by_threshold()
-                dataset._normalize()
-                dataset._discretization()
-                dataset._preload_weight_matrix()
-                dataset._change_feat_format()
-        else:
-            self._change_feat_format()
-            if self.benchmark_filename_list is not None:
-                self._drop_unused_col()
-                cumsum = list(np.cumsum(self.file_size_list))
-                datasets = [self.copy(self.inter_feat[start:end]) for start, end in zip([0] + cumsum[:-1], cumsum)]
-
-        # Augmentation only for Training
+        # Augmentation for Training
         self.masked_training = False if not hasattr(self.config, "masked_training") else self.config["masked_training"]
         self.train_subsequences = False if not hasattr(self.config, "train_subsequences") else self.config[
             "train_subsequences"]
+
+        # Augmentation for Testing
         self.test_subsequences = False if not hasattr(self.config, "test_subsequences") else self.config[
             "test_subsequences"]
-        self.subsequences_end_with_items = False if not hasattr(self.config, "subsequences_end_with_items") else \
-        self.config["subsequences_end_with_items"]
-
-        # For testing, we can create empty sequences to test the model's abilities to work only with user features
         self.create_empty_sequences = False if not hasattr(self.config, "test_empty_sequences") else self.config[
             "test_empty_sequences"]
+        self.test_only_users_with_infos = False if not hasattr(self.config, "test_only_users_with_infos") else \
+            self.config["test_only_users_with_infos"]
+
+        # Augmentation Options
+        self.subsequences_end_with_items = False if not hasattr(self.config, "subsequences_end_with_items") else \
+            self.config["subsequences_end_with_items"]
+
+
+        datasets = [self.copy(self.inter_feat[stage]) for stage in self.benchmark_filename_list]
+        if self.test_only_users_with_infos:
+            datasets[2]._filter_interaction_without_userinfo()
+        for dataset in datasets:
+            dataset._user_item_feat_preparation()
+            dataset._fill_nan()
+            dataset._set_label_by_threshold()
+            dataset._normalize()
+            dataset._discretization()
+            dataset._preload_weight_matrix()
+            dataset._change_feat_format()
 
         datasets[0].data_augmentation(subsequences=self.train_subsequences, masked_training=self.masked_training,
                                       subsequences_end_with_items=self.subsequences_end_with_items)
