@@ -121,6 +121,7 @@ class Trainer(AbstractTrainer):
         self.learning_rate = config["learning_rate"]
         self.epochs = config["epochs"]
         self.eval_step = min(config["eval_step"], self.epochs)
+        self.test_step = min(config["test_step"], self.epochs)
         self.stopping_step = config["stopping_step"]
         self.clip_grad_norm = config["clip_grad_norm"]
         self.valid_metric = config["valid_metric"].lower()
@@ -460,8 +461,9 @@ class Trainer(AbstractTrainer):
 
             # Eval each epoch
             if test_data is not None:
-                test_result = self.evaluate(test_data, load_best_model=False, show_progress=show_progress)
-                self.wandblogger.log_metrics({**test_result, "test_step": epoch_idx}, head="ep_test")
+                if (epoch_idx + 1) % self.test_step == 0:
+                    test_result = self.evaluate(test_data, load_best_model=False, show_progress=show_progress)
+                    self.wandblogger.log_metrics({**test_result, "test_step": epoch_idx}, head="ep_test")
 
             # eval
             if self.eval_step <= 0 or not valid_data:
