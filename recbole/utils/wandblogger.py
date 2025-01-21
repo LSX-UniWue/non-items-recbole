@@ -35,8 +35,12 @@ class WandbLogger(object):
 
             # Initialize a W&B run
             if self._wandb.run is None:
-                self._wandb.init(project=self.config.wandb_project, config=self.config, name=self.config.wandb_name,
-                                 entity=self.config.wandb_entity)
+                wandb_project = self.config.wandb_project if hasattr(self.config,"wandb_project") else None
+                wandb_name = self.config.wandb_name if hasattr(self.config,"wandb_name") else None
+                wandb_entity = self.config.wandb_entity if hasattr(self.config,"wandb_entity") else None
+
+                self._wandb.init(project=wandb_project, config=self.config, name=wandb_name,
+                                 entity=wandb_entity)
 
             self._set_steps()
 
