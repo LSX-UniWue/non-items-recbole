@@ -120,6 +120,10 @@ class Trainer(AbstractTrainer):
         self.learner = config["learner"]
         self.learning_rate = config["learning_rate"]
         self.epochs = config["epochs"]
+        if hasattr(config, "epochs"):
+            self.logger.info(f"epochs in config: {config['epochs']}")
+        else:
+            print(config)
         self.eval_step = min(config["eval_step"], self.epochs)
         self.test_step = min(config["test_step"], self.epochs)
         self.stopping_step = config["stopping_step"]
