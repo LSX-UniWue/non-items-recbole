@@ -75,6 +75,7 @@ class Collector(object):
         self.full = "full" in config["eval_args"]["mode"]
         self.topk = self.config["topk"]
         self.device = self.config["device"]
+        self.user_id = self.config["USER_ID_FIELD"]
 
     def data_collect(self, train_data):
         """Collect the evaluation resource from training data.
@@ -169,6 +170,7 @@ class Collector(object):
             self.data_struct.update_tensor("rec.topk", result)
             self.data_struct.update_tensor("rec.seq_len", interaction["item_length"])
             self.data_struct.update_tensor("rec.pos_item", positive_i)
+            self.data_struct.update_tensor("rec.user_id", interaction[self.user_id])
 
         if self.register.need("rec.meanrank"):
 
@@ -228,7 +230,7 @@ class Collector(object):
         for key in self.data_struct._data_dict:
             self.data_struct._data_dict[key] = self.data_struct._data_dict[key].cpu()
         returned_struct = copy.deepcopy(self.data_struct)
-        for key in ["rec.topk","rec.seq_len","rec.pos_item","rec.meanrank", "rec.score", "rec.items", "data.label"]:
+        for key in ["rec.topk","rec.seq_len","rec.pos_item","rec.meanrank", "rec.score", "rec.items", "data.label", "rec.user_id"]:
             if key in self.data_struct:
                 del self.data_struct[key]
         return returned_struct

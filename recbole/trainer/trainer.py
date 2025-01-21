@@ -676,6 +676,21 @@ class Trainer(AbstractTrainer):
                 df_sorted = df.sort_values(by="count", ascending=False)
                 self.wandblogger._wandb.log({"item_counts_metrics": wandb.Table(dataframe=df_sorted)})
 
+            if self.config["eval_args"].get("eval_per_user", False):
+                per_item_dicts, item_counts = self.evaluator.evaluate_per_user(struct)
+                metrics_data = []
+                if not self.config["single_spec"]:
+                    for key, value in per_item_dicts.items():
+                        per_item_dicts[key] = self._map_reduce(value, num_sample)
+                for key, value in per_item_dicts.items():
+                    self.wandblogger.log_metrics({**value, "per_user_id": key}, head="per_user_metrics")
+                    entry = {"User ID": key, "count": item_counts.get(key, 0)}
+                    entry.update(value)  # Add all metrics
+                    metrics_data.append(entry)
+                df = pd.DataFrame(metrics_data)
+                df_sorted = df.sort_values(by="count", ascending=False)
+                self.wandblogger._wandb.log({"per_user_metrics": wandb.Table(dataframe=df_sorted)})
+
 
         result = self.evaluator.evaluate(struct)
         if not self.config["single_spec"]:
