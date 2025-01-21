@@ -113,19 +113,14 @@ class Trainer(AbstractTrainer):
 
     def __init__(self, config, model):
         super(Trainer, self).__init__(config, model)
-
         self.logger = getLogger()
         self.tensorboard = get_tensorboard(self.logger)
         self.wandblogger = WandbLogger(config)
         self.learner = config["learner"]
         self.learning_rate = config["learning_rate"]
         self.epochs = config["epochs"]
-        if hasattr(config, "epochs"):
-            self.logger.info(f"epochs in config: {config['epochs']}")
-        else:
-            print(config)
         self.eval_step = min(config["eval_step"], self.epochs)
-        self.test_step = min(config["test_step"], self.epochs)
+        self.test_step = min(config["test_step"], self.epochs) if hasattr(config, "test_step") else self.epochs
         self.stopping_step = config["stopping_step"]
         self.clip_grad_norm = config["clip_grad_norm"]
         self.valid_metric = config["valid_metric"].lower()
