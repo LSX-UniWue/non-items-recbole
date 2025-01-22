@@ -18,7 +18,7 @@ seed: 212
 state: DEBUG  #INFO
 reproducibility: True
 data_path: '/Users/lisa/RecBole/dataset/'
-checkpoint_dir: 'Users/lisa/RecBole/saved/'
+checkpoint_dir: '/Users/lisa/RecBole/saved/'
 show_progress: True
 save_dataset: False
 save_dataloaders: False
