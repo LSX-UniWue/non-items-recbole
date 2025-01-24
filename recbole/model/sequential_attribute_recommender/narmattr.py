@@ -108,7 +108,7 @@ class NARMAttr(SequentialRecommender):
                                              use_masked_sequence=False, pad_values=self.pad_dict)
         item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb)
         embedded_user_features = embed_user_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
-
+        mask_seq = item_seq
         if self.user_fusion == "pre_merge":
             item_seq_emb = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=item_seq_emb)
 
