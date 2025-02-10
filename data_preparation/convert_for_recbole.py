@@ -10,9 +10,12 @@ app = typer.Typer()
 
 @app.command()
 
-def create(name: str = typer.Argument(..., help='dataset name, e.g. coveo, ml-20m, ml-20m-extended'),
-           input_dir: Path = typer.Argument(..., help='the path to the config file', exists=True),
-           output_dir: Path = typer.Argument(..., help='the path to the config file', exists=False)):
+def convert_to_recbole(name: str = typer.Argument(..., help='dataset name, e.g. coveo, ml-20m, ml-20m-extended'),
+                       input_dir: Path = typer.Argument(..., help='the path to the config file', exists=True),
+                       output_dir: Path = typer.Argument(..., help='the path to the config file', exists=False)):
+
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir)
 
     converters = {}
     float_cols = []
@@ -24,14 +27,14 @@ def create(name: str = typer.Argument(..., help='dataset name, e.g. coveo, ml-20
         dtype = {"server_timestamp_epoch_ms": int, "session_id_hash": str, "product_sku_hash": str,
                "category_hash":str}
 
-    if name == "coveo-sl":
+    elif name == "coveo-sl":
         float_cols = ["server_timestamp_epoch_ms"]
         token_cols = ["session_id_hash", "product_sku_hash", "hashed_url"]
         token_seq_cols = ["category_hash"]
         dtype = {"server_timestamp_epoch_ms": int, "session_id_hash": str, "product_sku_hash": str,
                  "category_hash":str}
 
-    if name == "coveo-pageview":
+    elif name == "coveo-pageview":
         #session_id_hash product_sku_hash    server_timestamp_epoch_ms   category_hash   item_id_type	category_product_id
         float_cols = ["server_timestamp_epoch_ms", "item_id_type"]
         token_cols = ["session_id_hash", "product_sku_hash", "category_product_id"]
@@ -40,7 +43,7 @@ def create(name: str = typer.Argument(..., help='dataset name, e.g. coveo, ml-20
         dtype = {"server_timestamp_epoch_ms": int, "session_id_hash": str, "product_sku_hash": str,
                  "category_hash": str, "category_product_id":str, "item_id_type":int}
 
-    if name == "coveo-sl-search":
+    elif name == "coveo-sl-search":
         float_cols = ["server_timestamp_epoch_ms", "item_id_type"]
         token_cols = ["session_id_hash", "product_sku_hash", "category_product_id", "first_result_product", "first_result_cat"]
         float_seq_cols = ["query_vector"]
@@ -49,14 +52,14 @@ def create(name: str = typer.Argument(..., help='dataset name, e.g. coveo, ml-20
         dtype = {"server_timestamp_epoch_ms": int, "session_id_hash": str, "product_sku_hash": str,
                  "category_hash": str, "category_product_id":str, "item_id_type":int, "first_result_product":str, "first_result_cat":str, "query_vector":str}
 
-    if name == "ml-20m-extended":
+    elif "-extended" in name:
         float_cols = ["timestamp","item_id_type"]
         token_cols = ["userId", "title", "title_genres"]
         vocab_cols = ['title:token', "title_genres:token", "item_id_type:float"]
         token_seq_cols = ["genres"]
         dtype = {"timestamp": int, "userId": str, "title_genres": str, "title": str, "genres":str, "item_id_type":int}
 
-    if name == "ml-20m":
+    elif "ml-" in name:
         float_cols = ["timestamp"]
         token_cols = ["userId", "movieId","title"]
         #vocab_cols = ['title:token', "title_genres:token", "item_id_type:float"]
@@ -64,7 +67,6 @@ def create(name: str = typer.Argument(..., help='dataset name, e.g. coveo, ml-20
         dtype= {"timestamp": int, "userId": str, "movieId": str, "title": str, "genres":str}
 
     output_name = name + "-recbole"
-    output_dir = output_dir / output_name
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -93,7 +95,9 @@ def create(name: str = typer.Argument(..., help='dataset name, e.g. coveo, ml-20
                 #.apply(convert_to_list_float)
                 df["first_result_cat_attr:token_seq"] = df["first_result_cat:token"].str.replace('\\', ' ',regex=True)
                 df["category_hash:token_seq"] = df["category_hash:token_seq"].str.replace('\\', ' ',regex=True)
-            df_name = output_name+"."+file.split(".")[1]+".inter"
+
+            #split
+            df_name = file.replace(".csv", ".inter").replace(name, output_name)
             df.to_csv(output_dir / df_name, sep="\t", index=False, header=True)
 
             if file.endswith("train.csv") and name in ["ml-20m-extended", "coveo-pageview", "coveo-sl-search"]:
@@ -121,7 +125,7 @@ def convert_to_list_float(value):
     if value == '[]':
         raise ValueError("Empty list")
     else:
-        return np.array([float(x) for x in value.strip('[]').split(', ')])
+        return np.array([float(x) for x in value.strip('[]').ratio_split(', ')])
 
 if __name__ == "__main__":
     app()

@@ -7,10 +7,9 @@ import pandas as pd
 import typer
 import torch
 
-from data_preparation.data_prep import read_csv
-
-
 import os
+from data_preparation.asme_converters import read_csv
+
 
 def random_value_from_column(column):
     # return a random value from the pandas column
@@ -19,7 +18,7 @@ def random_value_from_column(column):
 
 def remove_consecutive_same_genre(group_df):
     return group_df.loc[group_df['genres'] != group_df['genres'].shift()]
-def create_extended_movielens_data(input_dir, output_dir, name, stage,modified_pages = "genres", fraction = 1.0):
+def create_extended_movielens_data(input_dir, output_dir, name, final_name,stage,modified_pages = "genres", fraction = 1.0):
     file_type = ".csv"
     encoding = "latin-1"
     delimiter = "\t"
@@ -71,5 +70,5 @@ def create_extended_movielens_data(input_dir, output_dir, name, stage,modified_p
     else:
         item_df = item_df[['userId', 'rating', 'timestamp', 'title', 'genres', 'year', 'title_genres', 'title_uid', 'item_id_type']]
     os.makedirs(output_dir, exist_ok=True)
-    item_df.to_csv(f'{output_dir}/{name+"-extended"}.{stage}{file_type}', sep=delimiter, index=False)
+    item_df.to_csv(f'{output_dir}/{final_name}.{stage}{file_type}', sep=delimiter, index=False)
 
