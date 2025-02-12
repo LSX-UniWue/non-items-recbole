@@ -24,8 +24,10 @@ from logging import getLogger
 from time import time
 
 import numpy as np
+import pandas as pd
 import torch
 import torch.optim as optim
+import wandb
 from torch.nn.utils.clip_grad import clip_grad_norm_
 from tqdm import tqdm
 import torch.cuda.amp as amp
@@ -111,7 +113,6 @@ class Trainer(AbstractTrainer):
 
     def __init__(self, config, model):
         super(Trainer, self).__init__(config, model)
-
         self.logger = getLogger()
         self.tensorboard = get_tensorboard(self.logger)
         self.wandblogger = WandbLogger(config)
@@ -119,6 +120,7 @@ class Trainer(AbstractTrainer):
         self.learning_rate = config["learning_rate"]
         self.epochs = config["epochs"]
         self.eval_step = min(config["eval_step"], self.epochs)
+        self.test_step = min(config["test_step"], self.epochs) if hasattr(config, "test_step") else self.epochs
         self.stopping_step = config["stopping_step"]
         self.clip_grad_norm = config["clip_grad_norm"]
         self.valid_metric = config["valid_metric"].lower()
@@ -406,6 +408,7 @@ class Trainer(AbstractTrainer):
         self,
         train_data,
         valid_data=None,
+        test_data=None,
         verbose=True,
         saved=True,
         show_progress=False,
@@ -454,6 +457,12 @@ class Trainer(AbstractTrainer):
                 {"epoch": epoch_idx, "train_loss": train_loss, "train_step": epoch_idx},
                 head="train",
             )
+
+            # Eval each epoch
+            if test_data is not None:
+                if (epoch_idx + 1) % self.test_step == 0:
+                    test_result = self.evaluate(test_data, load_best_model=False, show_progress=show_progress)
+                    self.wandblogger.log_metrics({**test_result, "test_step": epoch_idx}, head="ep_test")
 
             # eval
             if self.eval_step <= 0 or not valid_data:
@@ -568,7 +577,8 @@ class Trainer(AbstractTrainer):
 
     @torch.no_grad()
     def evaluate(
-        self, eval_data, load_best_model=True, model_file=None, show_progress=False, write_predictions=None
+            self, eval_data, load_best_model=True, model_file=None, show_progress=False, write_predictions=None,
+            is_final_test_stage=False
     ):
         r"""Evaluate the model based on the eval data.
 
@@ -632,11 +642,59 @@ class Trainer(AbstractTrainer):
 
         self.eval_collector.model_collect(self.model)
         struct = self.eval_collector.get_data_struct()
+
+        if is_final_test_stage == True:
+            if self.config["eval_args"].get("eval_sequence_len", False) == True:
+                self.logger.info("Evaluating per sequence length")
+                lengths_dicts, lengths_counts = self.evaluator.evaluate_sequence_lengths(struct, range(0, self.config["eval_args"]["max_sequence_len"]))
+                metrics_data = []
+                if not self.config["single_spec"]:
+                    for key, value in lengths_dicts.items():
+                        lengths_dicts[key] = self._map_reduce(value, num_sample)
+                for key, value in lengths_dicts.items():
+                    self.wandblogger.log_metrics({**value, "seq_len_step": key}, head="seq_len")
+                    entry = {"seq_len": key, "count": lengths_counts.get(key, 0)}
+                    entry.update(value)  # Add all metrics
+                    metrics_data.append(entry)
+                df = pd.DataFrame(metrics_data)
+                df_sorted = df.sort_values(by="seq_len", ascending=True)
+                self.wandblogger._wandb.log({"seq_len_metrics": wandb.Table(dataframe=df_sorted)})
+
+            if self.config["eval_args"].get("eval_per_item", False):
+                per_item_dicts, item_counts = self.evaluator.evaluate_per_item(struct, range(0, eval_data._dataset.item_num))
+                metrics_data = []
+                if not self.config["single_spec"]:
+                    for key, value in per_item_dicts.items():
+                        per_item_dicts[key] = self._map_reduce(value, num_sample)
+                for key, value in per_item_dicts.items():
+                    self.wandblogger.log_metrics({**value, "per_item_id": key}, head="per_item_metrics")
+                    entry = {"ItemId": key, "count": item_counts.get(key, 0)}
+                    entry.update(value)  # Add all metrics
+                    metrics_data.append(entry)
+                df = pd.DataFrame(metrics_data)
+                df_sorted = df.sort_values(by="count", ascending=False)
+                self.wandblogger._wandb.log({"item_counts_metrics": wandb.Table(dataframe=df_sorted)})
+
+            if self.config["eval_args"].get("eval_per_user", False):
+                per_item_dicts, item_counts = self.evaluator.evaluate_per_user(struct)
+                metrics_data = []
+                if not self.config["single_spec"]:
+                    for key, value in per_item_dicts.items():
+                        per_item_dicts[key] = self._map_reduce(value, num_sample)
+                for key, value in per_item_dicts.items():
+                    self.wandblogger.log_metrics({**value, "per_user_id": key}, head="per_user_metrics")
+                    entry = {"User ID": key, "count": item_counts.get(key, 0)}
+                    entry.update(value)  # Add all metrics
+                    metrics_data.append(entry)
+                df = pd.DataFrame(metrics_data)
+                df_sorted = df.sort_values(by="count", ascending=False)
+                self.wandblogger._wandb.log({"per_user_metrics": wandb.Table(dataframe=df_sorted)})
+
+
         result = self.evaluator.evaluate(struct)
         if not self.config["single_spec"]:
             result = self._map_reduce(result, num_sample)
         self.wandblogger.log_eval_metrics(result, head="eval")
-
         return result
 
     def eval_all_batches(self, eval_func, iter_data, num_sample, show_progress, eval_data, output_file=None):
@@ -661,7 +719,6 @@ class Trainer(AbstractTrainer):
                     recos = str(list(id2token_dict[itemid_name][top5_indices]))
 
                 output_file.write(f"{userid}\t{recos}\n")
-
         return num_sample
 
     def _map_reduce(self, result, num_sample):

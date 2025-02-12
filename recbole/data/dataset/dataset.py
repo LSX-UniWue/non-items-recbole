@@ -160,14 +160,16 @@ class Dataset(torch.utils.data.Dataset):
         self.feat_name_list = self._build_feat_name_list()
         if self.benchmark_filename_list is None:
             self._data_filtering()
+            self._remap_ID_all()
+            self._user_item_feat_preparation()
+            self._fill_nan()
+            self._set_label_by_threshold()
+            self._normalize()
+            self._discretization()
+            self._preload_weight_matrix()
+        else:
+            self._remap_ID_all()
 
-        self._remap_ID_all()
-        self._user_item_feat_preparation()
-        self._fill_nan()
-        self._set_label_by_threshold()
-        self._normalize()
-        self._discretization()
-        self._preload_weight_matrix()
 
     def _data_filtering(self):
         """Data filtering
@@ -300,22 +302,29 @@ class Dataset(torch.utils.data.Dataset):
         else:
             sub_inter_lens = []
             sub_inter_feats = []
+            sub_field2seqlen = []
             overall_field2seqlen = defaultdict(int)
+            self.inter_feat = {}
             for filename in self.benchmark_filename_list:
                 file_path = os.path.join(dataset_path, f"{token}.{filename}.inter")
                 if os.path.isfile(file_path):
                     temp = self._load_feat(file_path, FeatureSource.INTERACTION)
                     sub_inter_feats.append(temp)
                     sub_inter_lens.append(len(temp))
+                    sub_field2seqlen.append(self.field2seqlen.copy())
                     for field in self.field2seqlen:
                         overall_field2seqlen[field] = max(
                             overall_field2seqlen[field], self.field2seqlen[field]
                         )
                 else:
                     raise ValueError(f"File {file_path} not exist.")
-            inter_feat = pd.concat(sub_inter_feats, ignore_index=True)
-            self.inter_feat, self.file_size_list = inter_feat, sub_inter_lens
-            self.field2seqlen = overall_field2seqlen
+            self.inter_feat[self.benchmark_filename_list[0]] = sub_inter_feats[0]
+            self.inter_feat[self.benchmark_filename_list[1]] = sub_inter_feats[1]
+            self.inter_feat[self.benchmark_filename_list[2]] = sub_inter_feats[2]
+            if self.config._get_final_config_dict().get("only_train_tokens", False):
+                self.field2seqlen = sub_field2seqlen[0]
+            else:
+                self.field2seqlen = overall_field2seqlen
 
     def _load_user_or_item_feat(self, token, dataset_path, source, field_name):
         """Load user/item features.
@@ -555,6 +564,17 @@ class Dataset(torch.utils.data.Dataset):
                 self._rest_fields, alias, assume_unique=True
             )
 
+    def _filter_interaction_without_userinfo(self):
+        """Sort :attr:`user_feat` and :attr:`item_feat` by ``user_id`` or ``item_id``.
+        Missing values will be filled later.
+        """
+        if self.user_feat is not None:
+            available_uuids = self.user_feat[[self.uid_field]].drop_duplicates()
+            filtered_inters = self.inter_feat.merge(available_uuids, on=self.uid_field, how='inner')
+            self.inter_feat = filtered_inters
+            self.logger.debug(set_color("Removing User interaction without user file.", "green"))
+
+
     def _user_item_feat_preparation(self):
         """Sort :attr:`user_feat` and :attr:`item_feat` by ``user_id`` or ``item_id``.
         Missing values will be filled later.
@@ -566,6 +586,9 @@ class Dataset(torch.utils.data.Dataset):
             )
             self.logger.debug(set_color("ordering user features by user id.", "green"))
         if self.item_feat is not None:
+            # Remove item_feat for unknown items
+            self.item_feat = self.item_feat[
+                self.item_feat[self.iid_field] != self.field2token_id[self.iid_field].get("[UNK]", None)]
             new_item_df = pd.DataFrame({self.iid_field: np.arange(self.item_num)})
             self.item_feat = pd.merge(
                 new_item_df, self.item_feat, on=self.iid_field, how="left"
@@ -642,19 +665,26 @@ class Dataset(torch.utils.data.Dataset):
 
         for feat_name in self.feat_name_list:
             feat = getattr(self, feat_name)
-            for field in feat:
-                ftype = self.field2type[field]
-                if ftype == FeatureType.TOKEN:
-                    feat[field].fillna(value=0, inplace=True)
-                elif ftype == FeatureType.FLOAT:
-                    feat[field].fillna(value=feat[field].mean(), inplace=True)
-                else:
-                    dtype = np.int64 if ftype == FeatureType.TOKEN_SEQ else np.float
-                    feat[field] = feat[field].apply(
-                        lambda x: (
-                            np.array([], dtype=dtype) if isinstance(x, float) else x
-                        )
+            if isinstance(feat, dict):
+                for key in feat:
+                    self.fil_nan_field_in_feat(feat[key])
+            else:
+                self.fil_nan_field_in_feat(feat)
+
+    def fil_nan_field_in_feat(self, feat):
+        for field in feat:
+            ftype = self.field2type[field]
+            if ftype == FeatureType.TOKEN:
+                feat[field].fillna(value=0, inplace=True)
+            elif ftype == FeatureType.FLOAT:
+                feat[field].fillna(value=feat[field].mean(), inplace=True)
+            else:
+                dtype = np.int64 if ftype == FeatureType.TOKEN_SEQ else np.float
+                feat[field] = feat[field].apply(
+                    lambda x: (
+                        np.array([], dtype=dtype) if isinstance(x, float) else x
                     )
+                )
 
     def _normalize(self):
         """Normalization if ``config['normalize_field']`` or ``config['normalize_all']`` is set.
@@ -1159,7 +1189,11 @@ class Dataset(torch.utils.data.Dataset):
         for field in field_list:
             ftype = self.field2type[field]
             for feat in self.field2feats(field):
-                remap_list.append((feat, field, ftype))
+                if isinstance(feat, dict):
+                    for stage in self.benchmark_filename_list:
+                        remap_list.append((stage,feat[stage], field, ftype))
+                else:
+                    remap_list.append(("unsplit",feat, field, ftype))
         return remap_list
 
     def _remap_ID_all(self):
@@ -1169,6 +1203,7 @@ class Dataset(torch.utils.data.Dataset):
             self._remap(remap_list)
 
         for field in self._rest_fields:
+            print(field)
             remap_list = self._get_remap_list(np.array([field]))
             self._remap(remap_list)
 
@@ -1184,7 +1219,7 @@ class Dataset(torch.utils.data.Dataset):
             - split points that can be used to restore the concatenated tokens.
         """
         tokens = []
-        for feat, field, ftype in remap_list:
+        for name, feat, field, ftype in remap_list:
             if ftype == FeatureType.TOKEN:
                 tokens.append(feat[field].values)
             elif ftype == FeatureType.TOKEN_SEQ:
@@ -1201,13 +1236,25 @@ class Dataset(torch.utils.data.Dataset):
         """
         if len(remap_list) == 0:
             return
-        tokens, split_point = self._concat_remaped_tokens(remap_list)
+        special_tokens = ["[PAD]"]
+
+        if self.config._get_final_config_dict().get("only_train_tokens", False):
+            special_tokens = ["[PAD]", "[UNK]"]
+            remap_candidate_list = []
+            for remap_candidate in remap_list:
+                if remap_candidate[0] not in self.benchmark_filename_list[1:]:
+                    remap_candidate_list.append(remap_candidate)
+        else:
+            remap_candidate_list = remap_list
+
+        tokens, split_point = self._concat_remaped_tokens(remap_candidate_list)
         new_ids_list, mp = pd.factorize(tokens)
-        new_ids_list = np.split(new_ids_list + 1, split_point)
-        mp = np.array(["[PAD]"] + list(mp))
+        new_ids_list = np.split(new_ids_list+len(special_tokens), split_point) #adjust ids for special tokens
+        mp = np.array(special_tokens + list(mp))
         token_id = {t: i for i, t in enumerate(mp)}
 
-        for (feat, field, ftype), new_ids in zip(remap_list, new_ids_list):
+        # Set all fields accordingly
+        for (name, feat, field, ftype), new_ids in zip(remap_candidate_list, new_ids_list):
             if field not in self.field2id_token:
                 self.field2id_token[field] = mp
                 self.field2token_id[field] = token_id
@@ -1216,6 +1263,41 @@ class Dataset(torch.utils.data.Dataset):
             elif ftype == FeatureType.TOKEN_SEQ:
                 split_point = np.cumsum(feat[field].agg(len))[:-1]
                 feat[field] = np.split(new_ids, split_point)
+
+        # Now set val and test reusing the mappings, except for the user_id
+        if self.config._get_final_config_dict().get("only_train_tokens", False):
+            remap_candidate_list = []
+            for remap_candidate in remap_list:
+                if remap_candidate[0] in self.benchmark_filename_list[1:]:
+                    remap_candidate_list.append(remap_candidate)
+            if len(remap_candidate_list) >0:
+                tokens, split_point = self._concat_remaped_tokens(remap_candidate_list)
+                remap_candidate_fields = [remap_candidate[2] for remap_candidate in remap_candidate_list]
+                mapped_tokens = []
+                if self.uid_field in remap_candidate_fields:
+                    # for new user ids, add them and update the mappings
+                    for token in tokens:
+                        mapped_token = token_id.get( str(token))  #cast to string, as .user already was change to int64
+                        if mapped_token is None:
+                            mapped_token = len(token_id) + 1  # Assign the next ID to new tokens
+                            token_id[token] = mapped_token
+                            mp = np.append(mp, token)
+                        mapped_tokens.append(mapped_token)
+                else:
+                    mapped_tokens = [token_id.get(str(token), 1) for token in tokens]
+                mapped_tokens = np.split(mapped_tokens, split_point)
+
+
+                for (name, feat, field, ftype), new_ids in zip(remap_candidate_list, mapped_tokens):
+                    if field == self.uid_field:
+                        self.field2id_token[field] = mp
+                        self.field2token_id[field] = token_id
+                    if ftype == FeatureType.TOKEN:
+                        feat[field] = new_ids
+                    elif ftype == FeatureType.TOKEN_SEQ:
+                        split_point = np.cumsum(feat[field].agg(len))[:-1]
+                        feat[field] = np.split(new_ids, split_point)
+
 
     def _change_feat_format(self):
         """Change feat format from :class:`pandas.DataFrame` to :class:`Interaction`."""

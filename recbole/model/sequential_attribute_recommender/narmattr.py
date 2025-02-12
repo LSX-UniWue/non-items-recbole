@@ -32,7 +32,8 @@ from torch.nn.init import xavier_normal_, constant_
 from recbole.model.abstract_recommender import SequentialRecommender
 from recbole.model.loss import BPRLoss
 from recbole.model.sequential_attribute_recommender.content_layers import create_attribute_embeddings, \
-    embed_attributes, merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict
+    embed_attributes, merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict, \
+    merge_user_embeddings, embed_user_attributes
 from recbole.model.sequential_recommender import NARM
 
 
@@ -59,8 +60,10 @@ class NARMAttr(SequentialRecommender):
         self.attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.item_attributes,
                                                                 self.embedding_size)
         self.user_attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.user_attributes,
-                                                                     self.embedding_size)
+                                                                     self.hidden_size)
+        self.user_fusion = None if self.user_attributes is None else self.user_attributes.get("user_fusion", "concat")
         self.pad_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="pad")
+
         self.emb_dropout = nn.Dropout(self.dropout_probs[0])
         self.gru = nn.GRU(
             self.embedding_size,
@@ -104,24 +107,26 @@ class NARMAttr(SequentialRecommender):
         embedded_features = embed_attributes(interaction, self.item_attributes, self.attribute_embeddings,
                                              use_masked_sequence=False, pad_values=self.pad_dict)
         item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_seq_emb)
-        embedded_user_features = embed_attributes(interaction, self.user_attributes, self.attribute_embeddings)
-        item_seq_emb = concat_user_embeddings(self.user_attributes,embedded_user_features, item_seq_emb)
-        if self.user_attributes is not None:
-            item_seq_len = item_seq_len + 1
+        embedded_user_features = embed_user_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
+        mask_seq = item_seq
+        if self.user_fusion == "pre_merge":
+            item_seq_emb = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=item_seq_emb)
+
+        if self.user_fusion == "concat":
+            item_seq_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_seq_emb)
+            item_seq_len = item_seq_len + torch.ones_like(item_seq_len)
+            user_mask = torch.ones((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
+            mask_seq = torch.concat((user_mask, item_seq), dim=1)
 
 
         item_seq_emb_dropout = self.emb_dropout(item_seq_emb)
         gru_out, _ = self.gru(item_seq_emb_dropout)
+        if self.user_fusion == "post_merge":
+            gru_out = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=gru_out)
 
         # fetch the last hidden state of last timestamp
         c_global = ht = self.gather_indexes(gru_out, item_seq_len - 1)
         # avoid the influence of padding
-        if self.user_attributes is not None:
-            user_mask = torch.ones(item_seq.size(0), 1, dtype=torch.int64, device=item_seq.device)
-            mask_seq = torch.cat((user_mask, item_seq), dim=1)
-        else:
-            mask_seq = item_seq
-
         mask = mask_seq.gt(0).unsqueeze(2).expand_as(gru_out)
         q1 = self.a_1(gru_out)
         q2 = self.a_2(ht)

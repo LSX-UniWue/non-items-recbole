@@ -20,8 +20,11 @@ Reference:
 
 """
 import torch
+from torch import nn
+
 from recbole.model.sequential_attribute_recommender.content_layers import create_attribute_embeddings, embed_attributes, \
-    merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict
+    merge_embedded_item_features, concat_user_embeddings, create_mask_or_pad_dict, merge_user_embeddings, \
+    embed_user_attributes
 from recbole.model.sequential_recommender import SASRec
 
 class SASRecAttr(SASRec):
@@ -43,41 +46,50 @@ class SASRecAttr(SASRec):
                                                                 self.hidden_size)
         self.user_attribute_embeddings = create_attribute_embeddings(dataset.field2token_id, self.user_attributes,
                                                                      self.hidden_size)
+        self.user_fusion = None if self.user_attributes is None else self.user_attributes.get("user_fusion", "concat")
         self.pad_dict = create_mask_or_pad_dict(self.item_attributes, dataset, logger=self.logger, mask_or_pad="pad")
+        if self.user_fusion == "concat":
+            self.final_seq_length = self.max_seq_length + 1
+        else:
+            self.final_seq_length = self.max_seq_length
+        self.position_embedding = nn.Embedding(self.final_seq_length, self.hidden_size)
+
         self.apply(self._init_weights)
 
     def forward(self, interaction):
         item_seq = interaction[self.ITEM_SEQ]
         item_seq_len = interaction[self.ITEM_SEQ_LEN]
-        position_ids = torch.arange(item_seq.size(1), dtype=torch.long, device=item_seq.device)
-        position_ids = position_ids.unsqueeze(0).expand_as(item_seq)
+        position_ids = torch.arange(self.final_seq_length, dtype=torch.long, device=item_seq.device)
+        position_ids = position_ids.unsqueeze(0)
         position_embedding = self.position_embedding(position_ids)
-
         item_emb = self.item_embedding(item_seq)
-        input_emb = item_emb + position_embedding
 
         embedded_features = embed_attributes(interaction, self.item_attributes, self.attribute_embeddings,
                                              use_masked_sequence=False, pad_values=self.pad_dict)
-        item_seq_emb = merge_embedded_item_features(embedded_features, self.item_attributes, input_emb)
-        embedded_user_features = embed_attributes(interaction, self.user_attributes, self.attribute_embeddings)
-        item_seq_emb = concat_user_embeddings(self.user_attributes,embedded_user_features, item_seq_emb)
-        if self.user_attributes is not None:
-            item_seq_len = item_seq_len + 1
-            user_mask = torch.ones(item_seq.size(0), 1, dtype=torch.int64, device=item_seq.device)
-            mask_seq = torch.cat((user_mask, item_seq), dim=1)
-        else:
-            mask_seq = item_seq
+        item_emb = merge_embedded_item_features(embedded_features, self.item_attributes, item_emb)
+        embedded_user_features = embed_user_attributes(interaction, self.user_attributes, self.user_attribute_embeddings)
+        mask_seq = item_seq
 
-        input_emb = self.LayerNorm(item_seq_emb)
+        if self.user_fusion == "pre_merge":
+            item_emb = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=item_emb)
+        if self.user_fusion == "concat":
+            item_emb = concat_user_embeddings(self.user_attributes, embedded_user_features, item_emb)
+            user_mask = torch.ones((item_seq.size(0),1), device=item_seq.device, dtype=item_seq.dtype)
+            mask_seq = torch.concat((user_mask, item_seq), dim=1)
+            item_seq_len = item_seq_len + torch.ones_like(item_seq_len)
+
+        input_emb = item_emb + position_embedding
+        input_emb = self.LayerNorm(input_emb)
         input_emb = self.dropout(input_emb)
 
         extended_attention_mask = self.get_attention_mask(mask_seq)
-
         trm_output = self.trm_encoder(
-            input_emb, extended_attention_mask, output_all_encoded_layers=True
-        )
-        output = trm_output[-1]
-        output = self.gather_indexes(output, item_seq_len - 1)
+            input_emb, extended_attention_mask, output_all_encoded_layers=True)[-1]
+
+        if self.user_fusion == "post_merge":
+            trm_output = merge_user_embeddings(self.user_attributes, embedded_user_features, sequence=trm_output)
+
+        output = self.gather_indexes(trm_output, item_seq_len - 1)
         return output  # [B H]
 
     def calculate_loss(self, interaction):

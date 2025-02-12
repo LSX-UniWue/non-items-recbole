@@ -210,6 +210,9 @@ class MaskItemSequenceAndAttributes:
         self.num_of_masked_items_choice = "actual" if not hasattr(config, "num_of_masked_items_choice") else config["num_of_masked_items_choice"]
         #max or actual or variable or variable_min
 
+        self.create_empty_sequences = False if not hasattr(config, "test_empty_sequences") else config[
+            "test_empty_sequences"]
+
         self.minimum_masked_numbers = 1
 
         self.ITEM_SEQ = config["ITEM_ID_FIELD"] + config["LIST_SUFFIX"]
@@ -249,7 +252,7 @@ class MaskItemSequenceAndAttributes:
         batched_item_sequences = interaction[self.ITEM_SEQ]
         batched_masked_item_sequences = batched_item_sequences.clone()
         batched_sequence_lengths = interaction[self.ITEM_SEQ_LEN]
-        if torch.all(batched_sequence_lengths < 2):
+        if torch.all(batched_sequence_lengths < 2) and self.create_empty_sequences == False:
             raise ValueError("batched_sequence_lengths contains len < 2, line 250")
         device = batched_item_sequences.device
         batch_size = batched_item_sequences.size(0)
@@ -290,7 +293,7 @@ class MaskItemSequenceAndAttributes:
                 mask_index_ids = torch.tensor([batched_sequence_lengths[sample_id] - 1], dtype=torch.long, device=device)
                 positive_items = masked_item_sequence[mask_index_ids]
                 masked_item_sequence[mask_index_ids] = item_masking_token
-                if 0 in positive_items:
+                if 0 in positive_items and self.create_empty_sequences == False:
                     raise ValueError("0 in tensor positive_items, line 288")
             else:
                 #Determine the number of masked items
@@ -313,7 +316,7 @@ class MaskItemSequenceAndAttributes:
                 #Determine IDs of masked Items
                 mask_index_ids = torch.randperm(base_sequence_len, dtype=torch.long, device=device)[:number_of_masked_items]
                 positive_items = masked_item_sequence[mask_index_ids]
-                if 0 in positive_items:
+                if 0 in positive_items and self.create_empty_sequences == False:
                     torch.set_printoptions(profile="full")
                     print("original_item_sequence: ")
                     print(original_item_sequence)
@@ -344,7 +347,7 @@ class MaskItemSequenceAndAttributes:
                                                        torch.tensor([batched_sequence_lengths[sample_id] - 1], dtype=torch.long, device=device)])
                         positive_items = torch.concat([positive_items,torch.tensor([masked_item_sequence[batched_sequence_lengths[sample_id] - 1]], dtype=torch.long, device=device)])
                         masked_item_sequence[mask_index_ids] = item_masking_token
-                        if 0 in positive_items:
+                        if 0 in positive_items and self.create_empty_sequences == False:
                             raise ValueError("0 in tensor positive_items, line 332")
 
             #Pad to the max mask length with zeros
@@ -354,7 +357,7 @@ class MaskItemSequenceAndAttributes:
             batch_pos_items[sample_id] = torch.concat([torch.zeros(final_mask_len - number_of_masked_items,
                                                                    dtype=torch.long, device=device), positive_items])
 
-            if torch.sum(batch_pos_items) == 0:
+            if torch.sum(batch_pos_items) == 0 and self.create_empty_sequences == False:
                 torch.set_printoptions(profile="full")
                 print("batched_item_sequences: ")
                 print(batched_item_sequences)

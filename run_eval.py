@@ -20,7 +20,10 @@ from recbole.utils import (
 def run_recbole(
     model_file,
     device='gpu',
-    write_predictions=None,):
+    write_predictions=None,
+    test_empty_sequences=False,
+    test_only_users_with_infos=False,
+    eval_per_user=False):
     r"""A fast running api, which includes the complete process of
     training and testing a model on a specified dataset
 
@@ -38,14 +41,18 @@ def run_recbole(
     checkpoint = torch.load(model_file, map_location=torch.device(device))
     config = checkpoint["config"]
 
+    config["test_empty_sequences"] = test_empty_sequences
+    config["test_only_users_with_infos"] = test_only_users_with_infos
+    config["eval_args"]["eval_per_user"] = eval_per_user
+
     init_seed(config["seed"], config["reproducibility"])
     init_logger(config)
     logger = getLogger()
     logger.info(config)
 
     dataset = create_dataset(config)
-    logger.info(dataset)
     train_data, valid_data, test_data = data_preparation(config, dataset)
+    logger.info(train_data)
 
     init_seed(config["seed"], config["reproducibility"])
     model = get_model(config["model"])(config, train_data._dataset).to(config["device"])
@@ -57,7 +64,7 @@ def run_recbole(
 
     # model evaluation
     test_result = trainer.evaluate(
-        test_data, load_best_model=False, show_progress=config["show_progress"], write_predictions=write_predictions
+        test_data, load_best_model=False, show_progress=config["show_progress"], write_predictions=write_predictions, is_final_test_stage= True
     )
 
     logger.info(test_result)
@@ -83,6 +90,10 @@ if __name__ == "__main__":
     parser.add_argument("--model_file", "-m", type=str, default=None, help="saved model")
     parser.add_argument("--device", type=str, default='cuda', help="device")
     parser.add_argument("--write_predictions", default=None, help="path to pred file")
+    parser.add_argument("--test_empty_sequences", type=bool, default=False, help="test empty sequences")
+    parser.add_argument("--test_only_users_with_infos", type=bool, default=False, help="test_only_users_with_infos")
+    parser.add_argument("--eval_per_user", type=bool, default=False, help="eval per user")
     args, _ = parser.parse_known_args()
 
-    res = run_recbole(args.model_file, args.device, args.write_predictions)
+    res = run_recbole(args.model_file, args.device, args.write_predictions, args.test_empty_sequences,
+                      args.test_only_users_with_infos, args.eval_per_user)

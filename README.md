@@ -82,4 +82,5 @@ The HypTrails analysis can be found in the [notebooks](notebooks) folder.
 ## Additional Visualizations for the Paper
 We provide additional plots for models on both Coveo datasets and the SynData dataset in the [visualizations](visualizations) folder. 
 These include TSNE plots of the item embedding spaces and the differences in item-to-item cosine similarity between 
-different embeddings/models. See the paper for more explanations.
+different embeddings/models. See the paper for more explanations. 
+Generally, all plots are based on the models trained with seed 212, unless marked otherwise.
