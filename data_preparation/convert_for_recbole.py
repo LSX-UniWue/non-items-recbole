@@ -66,7 +66,7 @@ def convert_to_recbole(name: str = typer.Argument(..., help='dataset name, e.g. 
         token_seq_cols = ["genres"]
         dtype= {"timestamp": int, "userId": str, "movieId": str, "title": str, "genres":str}
 
-    output_name = name + "-recbole"
+    output_name = name #+ "-recbole"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -125,7 +125,7 @@ def convert_to_list_float(value):
     if value == '[]':
         raise ValueError("Empty list")
     else:
-        return np.array([float(x) for x in value.strip('[]').ratio_split(', ')])
+        return np.array([float(x) for x in value.strip('[]').split(', ')])
 
 if __name__ == "__main__":
     app()

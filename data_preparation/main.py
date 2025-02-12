@@ -6,7 +6,7 @@ import numpy as np
 import requests
 import argparse
 
-from asme_converters import Movielens1MConverter, Movielens20MConverter
+from asme_converters import Movielens1MConverter, Movielens20MConverter, CoveoConverter
 from data_preparation.convert_for_recbole import convert_to_recbole
 from data_preparation.create_ml_datasets import create_extended_movielens_data
 
@@ -52,13 +52,13 @@ def download_movielens(dataset_dir, dataset_name="ml-20m"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    #parser.add_argument("--download", "-m", type=str, default="BPR", help="name of models")
     parser.add_argument("--dataset", "-d", type=str, default="ml-1m", help="name of dataset:"
                                                                            "\nml-1m: MovieLens 1M dataset"
                                                                            "\nml-20m: MovieLens 20M dataset"
                                                                            "\ncoveo: Coveo dataset")
     parser.add_argument("--dataset_path", type=str, default="./datasets/", help="path to save datasets")
     parser.add_argument("--random", type=bool, default=False, help="create randomized non-item pages for movielens data")
+    parser.add_argument("--use_original_split", type=bool, default=True, help="use original split for movielens 20m")
     args, _ = parser.parse_known_args()
 
     print(args)
@@ -73,7 +73,7 @@ if __name__ == "__main__":
             converter.apply(input_dir=args.dataset_path+"raw/",output_file=Path(args.dataset_path+"temp/"+dataset))
             convert_to_recbole(dataset, args.dataset_path + "temp/" + dataset, args.dataset_path + "final/" + dataset)
         if args.dataset == "ml-20m":
-            converter = Movielens20MConverter()
+            converter = Movielens20MConverter(use_original_split=args.use_original_split)
             converter.apply(input_dir=args.dataset_path+"raw/",output_file=Path(args.dataset_path+"temp/"+dataset))
             convert_to_recbole(dataset, args.dataset_path + "temp/" + dataset, args.dataset_path + "final/" + dataset)
         else:
@@ -97,7 +97,63 @@ if __name__ == "__main__":
                                                    stage=stage, modified_pages="random", fraction=fraction)
                 print("Convert to Recbole")
                 convert_to_recbole(dataset+"-extended", args.dataset_path+"temp/"+dataset+"-random-"+str(fraction), args.dataset_path+"final/"+dataset+"-random-"+str(fraction))
-        #delete temp files
         print("Delete temp files")
         os.system("rm -r "+args.dataset_path+"temp/")
+
+    elif args.dataset == "coveo-search":
+        filter_immediate_duplicates = True
+        end_of_train: int = 1552138259347  # timestamp for ~ 70/15/15 split, based on item interactions
+        end_of_validation: int = 1553704815974
+        min_sequence_length: int = 2
+        min_item_feedback: int = 1
+
+        dataset_name= "coveo-sl"
+        print("Prepare", dataset_name)
+        converter = CoveoConverter(end_of_train, end_of_validation, min_item_feedback, min_sequence_length,
+                                   False, dataset_name, True, False,
+                                   filter_immediate_duplicates, delimiter="\t")
+        converter.apply(input_dir=args.dataset_path+"/train", output_dir=Path(args.dataset_path+"/temp/"+dataset_name))
+        print("Convert", dataset_name)
+        convert_to_recbole(dataset_name, args.dataset_path + "/temp/" + dataset_name, args.dataset_path + "/final/" + dataset_name)
+
+        dataset_name = "coveo-sl-search"
+        print("Prepare", dataset_name)
+        converter = CoveoConverter(end_of_train, end_of_validation, min_item_feedback, min_sequence_length,
+                                   False,dataset_name, True, True,
+                                   filter_immediate_duplicates, delimiter="\t")
+        converter.apply(input_dir=args.dataset_path+"/train", output_dir=Path(args.dataset_path+"/temp/"+dataset_name))
+        print("convert", dataset_name)
+        convert_to_recbole(dataset_name, args.dataset_path + "/temp/" + dataset_name, args.dataset_path + "/final/" + dataset_name)
+        print("Delete temp files")
+        os.system("rm -r "+args.dataset_path+"/temp/")
+
+    elif args.dataset == "coveo-pageview":
+        filter_immediate_duplicates = True
+        end_of_train: int = 1552138259347  # timestamp for ~ 70/15/15 split, based on item interactions
+        end_of_validation: int = 1553704815974
+        min_sequence_length: int = 2
+        min_item_feedback: int = 1
+
+        dataset_name = "coveo"
+        print("Prepare", dataset_name)
+        converter = CoveoConverter(end_of_train, end_of_validation, min_item_feedback, min_sequence_length,
+                                   False, dataset_name, False, False,
+                                   filter_immediate_duplicates, delimiter="\t")
+        converter.apply(input_dir=args.dataset_path+"/train", output_dir=Path(args.dataset_path+"/temp/"+dataset_name))
+        print("Convert", dataset_name)
+        convert_to_recbole(dataset_name, args.dataset_path + "/temp/" + dataset_name, args.dataset_path + "/final/" + dataset_name)
+
+        dataset_name = "coveo-pageview"
+        print("Prepare", dataset_name)
+        converter = CoveoConverter(end_of_train, end_of_validation, min_item_feedback, min_sequence_length,
+                                   True, dataset_name, False, False,
+                                   filter_immediate_duplicates, delimiter="\t")
+        converter.apply(input_dir=args.dataset_path+"/train", output_dir=Path(args.dataset_path+"/temp/"+dataset_name))
+        print("Convert", dataset_name)
+        convert_to_recbole(dataset_name, args.dataset_path + "/temp/" + dataset_name, args.dataset_path + "/final/" + dataset_name)
+        print("Delete temp files")
+        os.system("rm -r "+args.dataset_path+"/temp/")
+
+
+
 

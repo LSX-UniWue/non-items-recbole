@@ -20,10 +20,11 @@ class Movielens20MConverter():
     RATING_MOVIE_COLUMN_NAME = 'movieId'
     RATING_TIMESTAMP_COLUMN_NAME = 'timestamp'
 
-    def __init__(self, delimiter="\t", min_item_feedback=4, min_sequence_length=4):
+    def __init__(self, delimiter="\t", min_item_feedback=4, min_sequence_length=4, use_original_split=True):
         self.delimiter = delimiter
         self.min_item_feedback = min_item_feedback
         self.min_sequence_length = min_sequence_length
+        self.use_original_split = use_original_split
 
     def apply(self, input_dir, output_file):
         file_type = ".csv"
@@ -48,7 +49,12 @@ class Movielens20MConverter():
         merged_df = apply_min_item_feedback(self.min_item_feedback,merged_df)
         merged_df = apply_min_sequence_length(self.min_sequence_length,merged_df)
 
-        train, val, test = data_ratio_split(merged_df, min_sequence_length=self.min_sequence_length)
+        loaded_dict = None
+        if self.use_original_split:
+            print("Using original split")
+            loaded_dict = np.load("data_preparation/original_split_dict.npy", allow_pickle=True).item()
+        train, val, test = data_ratio_split(merged_df, min_sequence_length=self.min_sequence_length,
+                                            pre_split=loaded_dict)
 
 
         output_file = Path(output_file)
@@ -78,16 +84,22 @@ def apply_min_sequence_length(min_sequence_length, dataset):
     dataset = dataset[dataset['userId'].isin(ids)].copy()
     return dataset
 
-def data_ratio_split(pd_data, train_percent: float = 0.8, val_percent: float = 0.1, test_percent: float = 0.1, min_sequence_length=4):
-    unique_users = pd_data['userId'].unique()
-    user_count = unique_users.shape[0]
-    np.random.shuffle(unique_users)
-    train_size = int(train_percent * user_count)
-    val_size = int(val_percent * user_count)
+def data_ratio_split(pd_data, train_percent: float = 0.8, val_percent: float = 0.1, test_percent: float = 0.1, min_sequence_length=4, pre_split = None):
 
-    train_users = unique_users[:train_size]
-    val_users = unique_users[train_size:train_size + val_size]
-    test_users = unique_users[train_size + val_size:]
+    if pre_split is None:
+        unique_users = pd_data['userId'].unique()
+        user_count = unique_users.shape[0]
+        np.random.shuffle(unique_users)
+        train_size = int(train_percent * user_count)
+        val_size = int(val_percent * user_count)
+
+        train_users = unique_users[:train_size]
+        val_users = unique_users[train_size:train_size + val_size]
+        test_users = unique_users[train_size + val_size:]
+    else:
+        train_users = pre_split['train']
+        val_users = pre_split['val']
+        test_users = pre_split['test']
 
     train = pd_data[pd_data['userId'].isin(train_users)]
     val = pd_data[pd_data['userId'].isin(val_users)]
@@ -128,7 +140,7 @@ class Movielens1MConverter():
         movies_df = read_csv(location, "movies", file_type, sep, header, encoding=encoding)
 
         movies_df.columns = ['movieId', 'title', 'genres']
-        movies_df["year"] = movies_df["title"].str.rsplit(r"(", 1).apply(lambda x: x[1].rsplit(r")")[0]).astype(int)
+        movies_df["year"] = movies_df["title"].str.rsplit(r"(", n=1).apply(lambda x: x[1].rsplit(r")")[0]).astype(int)
         users_df = read_csv(location, "users", file_type, sep, header, encoding=encoding)
         users_df.columns = [Movielens1MConverter.RATING_USER_COLUMN_NAME, 'gender', 'age', 'occupation', 'zip']
         ratings_df = pd.merge(ratings_df, users_df)
@@ -168,8 +180,7 @@ class CoveoConverter:
         self.search_sessions_only = search_sessions_only
         self.filter_immediate_duplicates = filter_immediate_duplicates
 
-    def apply(self, input_dir: Path, output_file: Path):
-        output_dir = output_file.parent
+    def apply(self, input_dir: Path, output_dir: Path):
         browsing_train, search_train, sku_to_content = self._load_raw_files(input_dir)
 
         self._convert_vectors_to_lists(search_train)
@@ -211,8 +222,8 @@ class CoveoConverter:
         self._fill_nan_values(train)
         self._fill_nan_values(validation)
 
-        if not os.path.exists(output_file):
-            output_file.parent.mkdir(parents=True, exist_ok=True)
+        if not os.path.exists(output_dir):
+            output_dir.mkdir(parents=True, exist_ok=True)
         self._export_files(desc_vector_dict, img_vector_dict, output_dir, test, train, validation, prefix=self.prefix)
 
     def _prepare_search_list_pages(self, search_clicks, sku_to_content):
@@ -221,7 +232,7 @@ class CoveoConverter:
         search_clicks.drop_duplicates(inplace=True)
         search_clicks = search_clicks[search_clicks['product_skus_hash'].notnull()]
         search_clicks["product_skus_hash"] = search_clicks["product_skus_hash"].str.replace('\[|\]|\'', '')
-        search_clicks["product_skus_hash"] = search_clicks["product_skus_hash"].str.ratio_split(",")
+        search_clicks["product_skus_hash"] = search_clicks["product_skus_hash"].str.split(",")
 
         #Get most common cats
         search_clicks_expl = search_clicks.explode("product_skus_hash")
@@ -231,7 +242,7 @@ class CoveoConverter:
             ["session_id_hash", "server_timestamp_epoch_ms", 'product_skus_hash']].copy()
         search_category["category_hash"] = search_category["product_skus_hash"].map(category_dict)
         search_category.dropna()
-        search_category.assign(category_hash=search_category['category_hash'].str.ratio_split('/')).explode('category_hash')
+        search_category.assign(category_hash=search_category['category_hash'].str.split('/')).explode('category_hash')
         search_category = self.get_list_page_categories(search_category)
 
         #First result
