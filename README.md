@@ -9,10 +9,10 @@ Here, you will find instructions on how to run the code and the experiments from
 ## 1. Installation
 Ensure you have **Python >=3.9 and <3.11** installed on your system.
 
-1. Clone the repository `git clone <repository_url>`
+1. Clone the repository `git clone https://github.com/LSX-UniWue/non-items-recbole.git`
 2. Navigate into the project directory
-   `cd <repository_name>`
-3. Create a virtual environment
+   `cd non-items-recbole`
+3. Create a virtual environment, e.g. with virtualenv:
    `virtualenv venv --python=python3.9`
 4. Activate the virtual environment
   - On macOS/Linux:`source venv/bin/activate`
@@ -54,7 +54,10 @@ Note: The datasets are saved in the `final` folder in the dataset_path.
 
 ### 3. Experiments
 
-We rely on wandb for logging and tracking experiments. You can create an account at [wandb.ai](https://wandb.ai/).
+We rely on wandb for logging and tracking experiments and suggest using it. 
+You can create an account at [wandb.ai](https://wandb.ai/).
+Also see the [RecBole](https://recbole.io/docs/user_guide/usage/use_weights_and_biases.html) documentation.
+
 To login, type `export WANDB_API_KEY=<your_api_key>` and `wandb login` in your terminal.
 
 ### Model Configs
@@ -64,9 +67,8 @@ To login, type `export WANDB_API_KEY=<your_api_key>` and `wandb login` in your t
 
 
 * You can run them with `python run_recbole.py --model='model_name' --dataset='dataset_name' --config_files 'path_to_config'`
-* a notebook for the hyptrails experiments is provided in notebooks/
 
-### Evaluation (with additional options)
+### Evaluation (per user)
 If you want to evaluate a model again, you can use the `run_eval.py` script.
 `run_eval.py --model_file /path/to/your/saved/modelfile.pth --device your_device`
 #### Arguments
@@ -74,9 +76,13 @@ If you want to evaluate a model again, you can use the `run_eval.py` script.
 * `--device`: The device you're using, e.g. `cuda` or `cpu`
 * `--eval_per_user`: Calculate the metrics for each user on the test set separately, e.g. for user-level significance testing. Default is False.
 
+### Significance Testing
+We evaluate the significance of the results using the paired Student's t-test on user level. 
+Therefore, you will need to evaluate the models per user first, which will log the per-user metrics to wandb, as described above.
+Then, you can use the [notebook] provided in to calculate the significance of the results.
 
 ### HypTrails 
-The HypTrails analysis can be found in the [notebooks](notebooks) folder.
+A notebook to conduct the HypTrails analysis can be found in the [notebooks](notebooks) folder.
 
 
 ## Additional Visualizations for the Paper
