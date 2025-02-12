@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "recbole"
+version = "0.1.0"
+description = ""
+authors = ["Elisabeth Fischer <elisabeth.fischer@informatik.uni-wuerzburg.de>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+torch = "~1.13.0"#">=1.10.0"
+numpy = ">=1.17.2"
+scipy = ">=1.6.0"
+hyperopt = "0.2.5"
+pandas = ">=1.4.0"
+tqdm = ">=4.48.2"
+scikit-learn = ">=0.23.2"
+pyyaml = ">=5.1.0"
+colorlog = "4.7.2"
+colorama = "0.4.4"
+tensorboard = ">=2.5.0"
+thop = ">=0.1.1.post2207130030"
+ray = {extras = ["tune"], version = "^2.9.2"}
+tabulate = ">=0.8.10"
+plotly = ">=4.0.0"
+texttable = ">=0.9.0"
+lightgbm = "^4.2.0"
+wandb = "^0.16.2"
+pyarrow = ">=13.0.0"
+seaborn = "^0.13.2"
+jupyter = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
