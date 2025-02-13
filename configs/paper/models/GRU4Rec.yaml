@@ -1,0 +1,7 @@
+# Model
+model: GRU4RecAttr
+embedding_size: 64
+dropout_prob: 0.2
+hidden_size: 64
+num_layers: 2
+loss_type: 'CE'

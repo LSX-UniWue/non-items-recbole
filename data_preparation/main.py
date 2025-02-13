@@ -87,6 +87,13 @@ if __name__ == "__main__":
                                            name=dataset,final_name=dataset+"-extended",
                                            stage=stage, modified_pages="genres", fraction=1.0)
         convert_to_recbole(dataset+"-extended", args.dataset_path+"temp/"+dataset+"-extended", args.dataset_path+"final/"+dataset+"-extended")
+        for stage in ["test","train","validation"]:
+            print("Create extended data for", stage, args.dataset)
+            create_extended_movielens_data(input_dir=args.dataset_path+"temp/"+dataset,
+                                           output_dir=args.dataset_path+"temp/"+dataset+"-first",
+                                           name=dataset,final_name=dataset+"-first",
+                                           stage=stage, modified_pages="first", fraction=1.0)
+        convert_to_recbole(dataset+"-first", args.dataset_path+"temp/"+dataset+"-first", args.dataset_path+"final/"+dataset+"-first")
         if args.random:
             for fraction in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]:
                 for stage in ["test","train","validation"]:

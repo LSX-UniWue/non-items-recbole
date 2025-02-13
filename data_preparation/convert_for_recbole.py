@@ -52,7 +52,7 @@ def convert_to_recbole(name: str = typer.Argument(..., help='dataset name, e.g. 
         dtype = {"server_timestamp_epoch_ms": int, "session_id_hash": str, "product_sku_hash": str,
                  "category_hash": str, "category_product_id":str, "item_id_type":int, "first_result_product":str, "first_result_cat":str, "query_vector":str}
 
-    elif "-extended" in name:
+    elif "-extended" in name or "first" in name:
         float_cols = ["timestamp","item_id_type"]
         token_cols = ["userId", "title", "title_genres"]
         vocab_cols = ['title:token', "title_genres:token", "item_id_type:float"]
