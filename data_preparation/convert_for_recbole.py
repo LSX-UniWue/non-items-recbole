@@ -52,7 +52,7 @@ def convert_to_recbole(name: str = typer.Argument(..., help='dataset name, e.g. 
         dtype = {"server_timestamp_epoch_ms": int, "session_id_hash": str, "product_sku_hash": str,
                  "category_hash": str, "category_product_id":str, "item_id_type":int, "first_result_product":str, "first_result_cat":str, "query_vector":str}
 
-    elif "-extended" in name or "first" in name:
+    elif "-extended" in name or ("first" in name or "random" in name):
         float_cols = ["timestamp","item_id_type"]
         token_cols = ["userId", "title", "title_genres"]
         vocab_cols = ['title:token', "title_genres:token", "item_id_type:float"]
@@ -62,7 +62,7 @@ def convert_to_recbole(name: str = typer.Argument(..., help='dataset name, e.g. 
     elif "ml-" in name:
         float_cols = ["timestamp"]
         token_cols = ["userId", "movieId","title"]
-        #vocab_cols = ['title:token', "title_genres:token", "item_id_type:float"]
+        vocab_cols = ['title:token', "title_genres:token", "item_id_type:float"]
         token_seq_cols = ["genres"]
         dtype= {"timestamp": int, "userId": str, "movieId": str, "title": str, "genres":str}
 
@@ -100,7 +100,7 @@ def convert_to_recbole(name: str = typer.Argument(..., help='dataset name, e.g. 
             df_name = file.replace(".csv", ".inter").replace(name, output_name)
             df.to_csv(output_dir / df_name, sep="\t", index=False, header=True)
 
-            if file.endswith("train.csv") and name in ["ml-20m-extended", "coveo-pageview", "coveo-sl-search"]:
+            if file.endswith("train.csv") and name not in [ "coveo", "coveo-sl", "ml-1m", "ml-20m"]:
                #create vocabulary from df
                 df_name = output_name+".item"
                 df = df[vocab_cols].drop_duplicates()

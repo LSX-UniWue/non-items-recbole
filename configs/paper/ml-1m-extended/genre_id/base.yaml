@@ -15,7 +15,7 @@ log_wandb: True
 # dataset
 load_col:
   inter: [userId, timestamp, title, genres, title_genres, item_id_type]
-  item: [title, title_genres, item_id_type]
+  item: [title_genres, item_id_type]
 #train_subsequences: True
 seq_separator: "|"
 seq_len:

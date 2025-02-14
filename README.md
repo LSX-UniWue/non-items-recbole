@@ -7,6 +7,7 @@ The code is based on the RecBole framework (https://recbole.io/).
 
 ## Running the Code and the Experiments
 Here, you will find instructions on how to run the code and the experiments from the paper.
+
 ## 1. Installation
 Ensure you have **Python >=3.9 and <3.11** installed on your system.
 
@@ -21,6 +22,12 @@ Ensure you have **Python >=3.9 and <3.11** installed on your system.
 5. Install dependencies
   - Using pip:`pip install -r requirements.txt`
   - Using Poetry: `poetry install`
+
+### Set up wandb
+We rely on wandb for logging and tracking experiments and suggest using it.
+You can create an account at [wandb.ai](https://wandb.ai/).
+Also see the [RecBole](https://recbole.io/docs/user_guide/usage/use_weights_and_biases.html) documentation.
+To login, type `export WANDB_API_KEY=<your_api_key>` and `wandb login` in your terminal.
 
 ## 2. Data Preparation
 First, you will need to acquire and prepare the datasets, but we try to keep this as simple as possible.
@@ -47,25 +54,15 @@ Note: Data was originally preprocessed in [ASME](https://github.com/elisabethfis
 
 #### Commands to recreate the datasets used in the paper 
 This might take some time - especially Coveo-Pageview.
-1. `python data_preparation/main.py --dataset ml-20m --random` - SynData, GroupedSynData and Randomized SynData
+1. `python data_preparation/main.py --dataset ml-20m --random True` - SynData, GroupedSynData and Randomized SynData
 2. `python data_preparation/main.py --dataset coveo-search --dataset_path .datasets/coveo/` - Coveo Search Dataset, provide your path to the raw data
 3. `python data_preparation/main.py --dataset coveo-pageview --dataset_path .datasets/coveo/` - Coveo Pageview Dataset, provide your path to the raw data
 
 Note: The datasets are saved in the `final` folder in the dataset_path.
 
-## 3. Experiments
-
-To run the experiments, follow the steps below to set everything up:
-
-### 1. wandb
-We rely on wandb for logging and tracking experiments and suggest using it. 
-You can create an account at [wandb.ai](https://wandb.ai/).
-Also see the [RecBole](https://recbole.io/docs/user_guide/usage/use_weights_and_biases.html) documentation. 
-To login, type `export WANDB_API_KEY=<your_api_key>` and `wandb login` in your terminal.
-
-### 2. Model Configurations
+### 3. Model Configurations
 Generate and adjust the model configurations to your needs with the [generate_configs.py](configs/paper/create_configs.py) script.
-Usage (with default arguments for a local, non-gpu run):
+Usage (with default arguments set for a local, non-gpu run):
 
 `python configs/paper/create_configs.py`
 
@@ -80,8 +77,7 @@ This will automatically create the model configurations for all experiments in t
 * `--gpu_id`: The GPU ID to use. Default is None.
 * `--train_batch_size`: The batch size for training. Default is 64.
 
-
-### 3. Running the Experiments
+### 4. Running Experiments
 Finally, to train the models, you can use the `run_recbole.py` script. Type
 
 `python run_recbole.py --config_files 'path_to_config'`

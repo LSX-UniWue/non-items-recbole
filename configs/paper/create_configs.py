@@ -30,7 +30,8 @@ def create_configs(working_directory, data_name, mode, ITEM_ID_FIELD, wandb_proj
                     base_yaml["checkpoint_dir"] = checkpoint_path
                     base_yaml["seed"] = seed
                     base_yaml["data_path"] = data_path
-                    base_yaml["eval_args"] = {'group_by': 'user', 'item_id': item_id_type, 'mode': {'test': 'full', 'valid': 'full'}, 'order': 'TO', 'split': {'RS': [0.8, 0.1, 0.1]}}
+                    if item_id_type is not None:
+                        base_yaml["eval_args"] = {'group_by': 'user', 'item_id': item_id_type, 'mode': {'test': 'full', 'valid': 'full'}, 'order': 'TO', 'split': {'RS': [0.8, 0.1, 0.1]}}
                     base_yaml["use_gpu"]= use_gpu
                     base_yaml["gpu_id"]= gpu_id
                     base_yaml["log_wandb"]= log_wandb
