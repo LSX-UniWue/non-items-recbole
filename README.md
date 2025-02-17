@@ -101,7 +101,7 @@ You will need to evaluate the models on user level as described above with
 Use [this notebook](notebooks/significance_testing.ipynb) to calculate the significance of the results.
 
 ## HypTrails 
-A notebook to conduct the HypTrails analysis can be found in the [notebooks](notebooks) folder.
+A notebook to conduct the HypTrails analysis can be found [here](notebooks/explore_hytrails.ipynb). All code necessary is included in the `hyptrails`directory for self-sufficiency.
 
 
 ## Additional Visualizations for the Paper
